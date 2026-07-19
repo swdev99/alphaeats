@@ -50,8 +50,22 @@ const SOLUTIONS = [
 
 const PLANS = [
   {
+    tag: "Light & Fresh", tagColor: "#C9A24B",
+    name: "Salad Plan", price: "₹3,999", period: "/mo",
+    protein: "18–22g", calories: "280–360",
+    audience: "Clean-eating lovers, light lunch plans",
+    bullets: ["Leafy greens & protein bowls", "No heavy sauces", "Hydrating and refreshing meals"],
+    image: saladSubscriptionImage,
+    details: {
+      mealStyle: "Fresh salad-forward lunch meals",
+      timing: "Best for midday delivery with light, high-fiber portions",
+      bestFor: "Members looking for a clean, low-calorie, high-hydration menu",
+      delivery: "Freshly packed dispatch with chilled-carry support",
+    },
+  },
+  {
     tag: "Most Popular", tagColor: "#3F7D4E",
-    name: "Fat Loss Plan", price: "₹6,999", period: "/mo",
+    name: "Fat Loss Plan", price: "₹5,999", period: "/mo",
     protein: "25–30g", calories: "350–450",
     audience: "Beginners, weight management",
     bullets: ["Low sodium, calorie-controlled", "Grilled/steamed proteins only", "Dressing packed separately"],
@@ -65,7 +79,7 @@ const PLANS = [
   },
   {
     tag: "High Protein", tagColor: "#2F5D9A",
-    name: "Power Meal", price: "₹7,499", period: "/mo",
+    name: "Power Meal", price: "₹7,710", period: "/mo",
     protein: "40–50g", calories: "500–600",
     audience: "Busy professionals, athletes, meal replacement",
     bullets: ["Lean protein priority", "Zinc-rich ingredients", "Essential micronutrient boost"],
@@ -79,7 +93,7 @@ const PLANS = [
   },
   {
     tag: "Premium", tagColor: "#6B3FA0",
-    name: "Elite Performance", price: "₹8,499", period: "/mo",
+    name: "Elite Performance", price: "₹8,970", period: "/mo",
     protein: "60–70g", calories: "850–900",
     audience: "Serious fitness goals, body recomposition",
     bullets: ["Omega-3 sources 3x/week", "Three-compartment packing", "Premium A-grade proteins"],
@@ -93,7 +107,7 @@ const PLANS = [
   },
   {
     tag: "High Performance", tagColor: "#B5651D",
-    name: "Athletic Plan", price: "₹9,499", period: "/mo",
+    name: "Athletic Plan", price: "₹11,970", period: "/mo",
     protein: "100–120g", calories: "1,100–1,300",
     audience: "Athletes training 5+ days/week, strength training",
     bullets: ["Multi-source protein blend", "Electrolyte-enhanced", "2x portion volume"],
@@ -103,20 +117,6 @@ const PLANS = [
       timing: "Built for heavy training days and endurance output",
       bestFor: "Athletes and strength-focused members with demanding calorie requirements",
       delivery: "Higher-volume dispatch setup with routine tracking and repeat delivery support",
-    },
-  },
-  {
-    tag: "Light & Fresh", tagColor: "#C9A24B",
-    name: "Salad Plan", price: "₹5,999", period: "/mo",
-    protein: "18–22g", calories: "280–360",
-    audience: "Clean-eating lovers, light lunch plans",
-    bullets: ["Leafy greens & protein bowls", "No heavy sauces", "Hydrating and refreshing meals"],
-    image: saladSubscriptionImage,
-    details: {
-      mealStyle: "Fresh salad-forward lunch meals",
-      timing: "Best for midday delivery with light, high-fiber portions",
-      bestFor: "Members looking for a clean, low-calorie, high-hydration menu",
-      delivery: "Freshly packed dispatch with chilled-carry support",
     },
   },
 ];
