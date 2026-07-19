@@ -102,6 +102,8 @@ const PLANS = [
       trial: "₹228",
       weekly: "₹1,599",
       monthly: "₹5,999",
+      twoMealWeekly: "₹2,999",
+      twoMealMonthly: "₹10,999",
     },
     protein: "25–30g", calories: "350–450",
     audience: "Beginners, weight management",
@@ -121,6 +123,8 @@ const PLANS = [
       trial: "₹279",
       weekly: "₹1,799",
       monthly: "₹7,710",
+      twoMealWeekly: "₹3,084",
+      twoMealMonthly: "₹15,420",
     },
     protein: "40–50g", calories: "500–600",
     audience: "Busy professionals, athletes, meal replacement",
@@ -140,6 +144,8 @@ const PLANS = [
       trial: "₹299",
       weekly: "₹2,099",
       monthly: "₹8,970",
+      twoMealWeekly: "₹4,198",
+      twoMealMonthly: "₹17,940",
     },
     protein: "60–70g", calories: "850–900",
     audience: "Serious fitness goals, body recomposition",
@@ -159,6 +165,8 @@ const PLANS = [
       trial: "₹399",
       weekly: "₹2,799",
       monthly: "₹11,970",
+      twoMealWeekly: "₹5,598",
+      twoMealMonthly: "₹23,940",
     },
     protein: "100–120g", calories: "1,100–1,300",
     audience: "Athletes training 5+ days/week, strength training",
@@ -413,7 +421,13 @@ export default function AlphaEatsSite() {
     const priceValue = saladTypeSpecificPrice || plan.priceOptions?.[priceKey];
     if (!priceValue) return 0;
     const amount = Number.parseInt(priceValue.replace(/[₹,]/g, ""), 10);
-    return Number.isNaN(amount) ? 0 : amount;
+    if (selection.mealType === "Trial Meal") return Number.isNaN(amount) ? 0 : amount;
+    const twoMealPriceValue = selection.timeSlot === "Both (Afternoon + Evening)"
+      ? (selection.mealType === "Weekly Meal" ? plan.priceOptions?.twoMealWeekly : plan.priceOptions?.twoMealMonthly)
+      : null;
+    const resolvedPriceValue = twoMealPriceValue || priceValue;
+    const resolvedAmount = Number.parseInt(resolvedPriceValue.replace(/[₹,]/g, ""), 10);
+    return Number.isNaN(resolvedAmount) ? 0 : resolvedAmount;
   };
 
   const getPlanPriceLabel = (selection) => {
@@ -424,7 +438,15 @@ export default function AlphaEatsSite() {
       ? plan.saladTypePriceOptions?.[selection.saladType]?.[priceKey]
       : null;
     const priceValue = saladTypeSpecificPrice || plan.priceOptions?.[priceKey];
-    return priceValue ? `${priceValue}` : `${plan.price}${plan.period || "/mo"}`;
+    if (!priceValue) return `${plan.price}${plan.period || "/mo"}`;
+    if (selection.mealType === "Trial Meal") {
+      return `${priceValue}`;
+    }
+    const twoMealPriceValue = selection.timeSlot === "Both (Afternoon + Evening)"
+      ? (selection.mealType === "Weekly Meal" ? plan.priceOptions?.twoMealWeekly : plan.priceOptions?.twoMealMonthly)
+      : null;
+    const resolvedPriceValue = twoMealPriceValue || priceValue;
+    return resolvedPriceValue ? `${resolvedPriceValue}` : `${priceValue}`;
   };
 
   const checkoutAmount = planSelections.reduce((total, selection) => total + getPlanPriceForSelection(selection), 0);
@@ -475,6 +497,9 @@ export default function AlphaEatsSite() {
     setPlanSelections((prev) => prev.map((item, itemIndex) => {
       if (itemIndex !== index) return item;
       const updatedItem = { ...item, [name]: value };
+      if (name === "mealType" && value === "Trial Meal" && updatedItem.timeSlot === "Both (Afternoon + Evening)") {
+        updatedItem.timeSlot = "Afternoon";
+      }
       if (name === "planName" && value === "Salad Plan" && !updatedItem.saladType) {
         updatedItem.saladType = "Salad Only (Fresh Premium Salad)";
       }
@@ -496,10 +521,11 @@ export default function AlphaEatsSite() {
 
   const addMealPlanRow = () => {
     setFormError("");
+    const fallbackPlanName = planSelections[0]?.planName || selectedPlanData?.name || PLANS[0]?.name || "Fat Loss Plan";
     setPlanSelections((prev) => [
       ...prev,
       {
-        planName: PLANS[0]?.name || "Fat Loss Plan",
+        planName: fallbackPlanName,
         startDate: "",
         timeSlot: "Afternoon",
         mealType: "Trial Meal",
@@ -963,9 +989,9 @@ export default function AlphaEatsSite() {
         .contact-list { display: flex; flex-direction: column; gap: 16px; }
         .contact-row { display: flex; align-items: center; gap: 14px; font-size: 1rem; color: var(--bone); }
         .contact-icon { width: 34px; height: 34px; border-radius: 50%; background: rgba(201,162,75,0.14); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
-        .contact-photo { aspect-ratio: 16/10; background: linear-gradient(150deg, #b98a2e, #6b4d1f); position: relative; display: flex; align-items: center; justify-content: center; }
-        .contact-photo-quote { color: #fff; font-style: italic; text-align: center; font-family: 'Playfair Display', serif; font-size: 1.4rem; padding: 0 30px; }
-        .contact-photo-tag { position: absolute; bottom: 18px; color: var(--gold-l); font-style: italic; font-size: 0.85rem; letter-spacing: 0.04em; }
+        .contact-photo { aspect-ratio: 16/10; background: linear-gradient(150deg, #b98a2e, #6b4d1f); position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .contact-photo-quote { color: #fff; font-style: italic; text-align: center; font-family: 'Playfair Display', serif; font-size: 1.4rem; padding: 0 30px; position: relative; z-index: 2; text-shadow: 0 2px 12px rgba(0,0,0,0.45); }
+        .contact-photo-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0.92; }
 
         footer { padding: 30px 6vw; display: flex; justify-content: space-between; align-items: center;
           border-top: 1px solid rgba(201,162,75,0.14); color: var(--slate); font-size: 0.82rem; background: var(--navy); }
@@ -1388,7 +1414,9 @@ export default function AlphaEatsSite() {
                             <select name="timeSlot" value={selection.timeSlot} onChange={(event) => handlePlanSelectionChange(index, event)} required>
                               <option value="Afternoon">Afternoon</option>
                               <option value="Evening">Evening</option>
-                              <option value="Both (Afternoon + Evening)">Both (Afternoon + Evening)</option>
+                              {selection.mealType !== "Trial Meal" && (
+                                <option value="Both (Afternoon + Evening)">Both (Afternoon + Evening)</option>
+                              )}
                             </select>
                           </label>
                         </div>
@@ -1586,8 +1614,8 @@ export default function AlphaEatsSite() {
           </Reveal>
           <Reveal delay={100}>
             <div className="contact-photo">
+              <img src={mealPhotoFive} alt="AlphaEats meal showcase" className="contact-photo-image" />
               <div className="contact-photo-quote">&ldquo;Fueling the Future of Fitness in India&rdquo;</div>
-              <div className="contact-photo-tag">Nutrition. Discipline. Results.</div>
             </div>
           </Reveal>
         </div>
