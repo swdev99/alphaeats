@@ -326,6 +326,16 @@ export default function AlphaEatsSite() {
   const [showAdditionalMobile, setShowAdditionalMobile] = useState(false);
   const [showAdditionalAddress, setShowAdditionalAddress] = useState(false);
   const [formError, setFormError] = useState("");
+  const [planSelections, setPlanSelections] = useState([
+    {
+      planName: PLANS[0]?.name || "Fat Loss Plan",
+      startDate: "",
+      timeSlot: "Both (Afternoon + Evening)",
+      mealType: "Trial Meal",
+      mealPreference: "VEG",
+      addOns: [],
+    },
+  ]);
   const [subscriptionForm, setSubscriptionForm] = useState({
     name: "",
     mobile: "",
@@ -333,9 +343,10 @@ export default function AlphaEatsSite() {
     email: "",
     address: "",
     additionalAddress: "",
-    mealType: "Trial Meal",
-    addOns: [],
   });
+
+  const activeSlideData = HOME_SLIDES[activeSlide];
+  const selectedPlanData = selectedPlan ? PLANS.find((plan) => plan.name === selectedPlan) : null;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -344,8 +355,20 @@ export default function AlphaEatsSite() {
     return () => clearInterval(timer);
   }, []);
 
-  const activeSlideData = HOME_SLIDES[activeSlide];
-  const selectedPlanData = selectedPlan ? PLANS.find((plan) => plan.name === selectedPlan) : null;
+  useEffect(() => {
+    if (selectedPlanData) {
+      setPlanSelections([
+        {
+          planName: selectedPlanData.name,
+          startDate: "",
+          timeSlot: "Both (Afternoon + Evening)",
+          mealType: "Trial Meal",
+          mealPreference: "VEG",
+          addOns: [],
+        },
+      ]);
+    }
+  }, [selectedPlanData]);
 
   const handleSubscriptionChange = (event) => {
     const { name, value } = event.target;
@@ -364,6 +387,38 @@ export default function AlphaEatsSite() {
     });
   };
 
+  const handlePlanSelectionChange = (index, event) => {
+    const { name, value } = event.target;
+    setFormError("");
+    setPlanSelections((prev) => prev.map((item, itemIndex) => itemIndex === index ? { ...item, [name]: value } : item));
+  };
+
+  const handlePlanAddOnToggle = (index, value) => {
+    setFormError("");
+    setPlanSelections((prev) => prev.map((item, itemIndex) => {
+      if (itemIndex !== index) return item;
+      const exists = item.addOns.includes(value);
+      return {
+        ...item,
+        addOns: exists ? item.addOns.filter((entry) => entry !== value) : [...item.addOns, value],
+      };
+    }));
+  };
+
+  const addMealPlanRow = () => {
+    setFormError("");
+    setPlanSelections((prev) => [
+      ...prev,
+      {
+        planName: PLANS[0]?.name || "Fat Loss Plan",
+        startDate: "",
+        timeSlot: "Afternoon",
+        mealType: "Trial Meal",
+        addOns: [],
+      },
+    ]);
+  };
+
   const handleSubscriptionSubmit = (event) => {
     event.preventDefault();
 
@@ -373,8 +428,6 @@ export default function AlphaEatsSite() {
     const email = subscriptionForm.email.trim();
     const address = subscriptionForm.address.trim();
     const additionalAddress = subscriptionForm.additionalAddress.trim();
-    const mealType = subscriptionForm.mealType;
-    const addOns = subscriptionForm.addOns;
 
     if (name.length < 2) {
       setFormError("Please enter a valid name.");
@@ -396,6 +449,22 @@ export default function AlphaEatsSite() {
       return;
     }
 
+    if (!planSelections.length) {
+      setFormError("Please add at least one meal plan.");
+      return;
+    }
+
+    for (const [index, selection] of planSelections.entries()) {
+      if (!selection.planName) {
+        setFormError(`Please choose a plan for meal ${index + 1}.`);
+        return;
+      }
+      if (!selection.startDate) {
+        setFormError(`Please select a start date for meal ${index + 1}.`);
+        return;
+      }
+    }
+
     if (showAdditionalMobile && additionalMobile && !/^\d{10}$/.test(additionalMobile)) {
       setFormError("Please enter a valid additional mobile number.");
       return;
@@ -406,7 +475,8 @@ export default function AlphaEatsSite() {
       return;
     }
 
-    const message = `Hi AlphaEats, I want to request a subscription.\n\nPlan: ${selectedPlanData.name}\nName: ${name}\nMobile: ${mobile}\nAdditional Mobile: ${additionalMobile || "N/A"}\nEmail: ${email}\nAddress: ${address}\nAdditional Address: ${additionalAddress || "N/A"}\nMeal Type: ${mealType}\nAdd-Ons: ${addOns.length ? addOns.join(", ") : "N/A"}`;
+    const planSummary = planSelections.map((selection, index) => `Meal Plan ${index + 1}: ${selection.planName}\nStarting From: ${selection.startDate}\nTime Slot: ${selection.timeSlot}\nMeal Type: ${selection.mealType}\nMeal Preference: ${selection.mealPreference || "VEG"}\nAdd-Ons: ${selection.addOns.length ? selection.addOns.join(", ") : "N/A"}`).join("\n\n");
+    const message = `Hi AlphaEats, I want to request a subscription.\n\nName: ${name}\nMobile: ${mobile}\nAdditional Mobile: ${additionalMobile || "N/A"}\nEmail: ${email}\nAddress: ${address}\nAdditional Address: ${additionalAddress || "N/A"}\n\n${planSummary}`;
     const waUrl = `https://wa.me/918805051500?text=${encodeURIComponent(message)}`;
     window.open(waUrl, "_blank", "noopener,noreferrer");
     setSelectedPlan(null);
@@ -420,9 +490,17 @@ export default function AlphaEatsSite() {
       email: "",
       address: "",
       additionalAddress: "",
-      mealType: "Trial Meal",
-      addOns: [],
     });
+    setPlanSelections([
+      {
+        planName: PLANS[0]?.name || "Fat Loss Plan",
+        startDate: "",
+        timeSlot: "Both (Afternoon + Evening)",
+        mealType: "Trial Meal",
+        mealPreference: "VEG",
+        addOns: [],
+      },
+    ]);
   };
 
   return (
@@ -462,6 +540,7 @@ export default function AlphaEatsSite() {
         .nav {
           position: sticky; top: 0; z-index: 40;
           display: flex; align-items: center; justify-content: space-between;
+          gap: 12px; flex-wrap: wrap;
           padding: 18px 6vw; background: rgba(19,27,39,0.86);
           backdrop-filter: blur(10px); border-bottom: 1px solid rgba(201,162,75,0.16);
         }
@@ -648,6 +727,12 @@ export default function AlphaEatsSite() {
         .plan-modal-list li { margin-bottom: 8px; }
         .plan-modal-actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
         .plan-modal-form { display: grid; gap: 14px; }
+        .plan-selection-card { border: 1px solid #E6DED0; background: #FBFAF7; padding: 14px; display: grid; gap: 12px; }
+        .plan-selection-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .plan-selection-head strong { font-size: 0.9rem; color: var(--ink); }
+        .plan-selection-grid { display: grid; gap: 10px; }
+        .plan-selection-remove { border: 1px solid #B42318; color: #B42318; background: transparent; padding: 8px 10px; font-weight: 700; cursor: pointer; }
+        .plan-selection-add { border: 1px solid var(--gold); background: transparent; color: var(--ink); padding: 10px 12px; font-weight: 700; cursor: pointer; }
         .plan-modal-field { display: grid; gap: 6px; }
         .plan-modal-field span { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #374151; }
         .plan-modal-field input,
@@ -673,10 +758,13 @@ export default function AlphaEatsSite() {
         .plan-modal-field input:focus,
         .plan-modal-field select:focus { outline: 2px solid rgba(201,162,75,0.28); border-color: var(--gold); }
         .plan-modal-inline-row {
-          display: flex; align-items: flex-end; gap: 10px;
+          display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end;
         }
         .plan-modal-inline-row .plan-modal-field {
-          flex: 1; min-width: 0;
+          min-width: 0;
+        }
+        .plan-modal-inline-row.two-up {
+          grid-template-columns: 1fr 1fr;
         }
         .plan-modal-toggle {
           border: 1px solid var(--gold); background: transparent; color: var(--ink); padding: 0;
@@ -787,6 +875,72 @@ export default function AlphaEatsSite() {
           .steps-row { grid-template-columns: 1fr 1fr; }
           .contact-grid { grid-template-columns: 1fr; }
           .nav-links { display: none; }
+        }
+
+        @media (max-width: 640px) {
+          .nav {
+            padding: 14px 5vw;
+          }
+          .plan-modal-inline-row,
+          .plan-modal-inline-row.two-up {
+            grid-template-columns: 1fr;
+          }
+          .nav-brand span {
+            font-size: 1rem;
+          }
+          .nav-cta {
+            width: 100%;
+            justify-content: center;
+          }
+          .hero {
+            min-height: 100svh;
+            height: 100svh;
+          }
+          .hero-content {
+            padding: 20vw 5vw 7vw;
+          }
+          .hero-title {
+            min-height: auto;
+            white-space: normal;
+            font-size: clamp(2rem, 10vw, 2.8rem) !important;
+          }
+          .hero-quote {
+            font-size: 0.98rem;
+            line-height: 1.6;
+          }
+          .section {
+            padding: 18vw 5vw;
+          }
+          .plan-grid-4,
+          .stat-grid,
+          .steps-row,
+          .zone-grid,
+          .roadmap-grid {
+            grid-template-columns: 1fr;
+          }
+          .plan-modal-overlay {
+            padding: 12px;
+          }
+          .plan-modal {
+            width: 100%;
+          }
+          .plan-modal-body {
+            padding: 16px;
+          }
+          .plan-modal-hero {
+            grid-template-columns: 1fr;
+          }
+          .plan-modal-addon-card {
+            min-width: 160px;
+            flex-basis: 160px;
+          }
+          .plan-modal-inline-row {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          .plan-modal-toggle {
+            width: 100%;
+          }
         }
       `}</style>
 
@@ -980,6 +1134,19 @@ export default function AlphaEatsSite() {
                   </label>
 
                   <div className="plan-modal-inline-row">
+                    <label className="plan-modal-field">
+                      <span>Mobile Number</span>
+                      <input
+                        type="tel"
+                        name="mobile"
+                        value={subscriptionForm.mobile}
+                        onChange={handleSubscriptionChange}
+                        placeholder="Enter your mobile number"
+                        pattern="[0-9]{10}"
+                        inputMode="numeric"
+                        required
+                      />
+                    </label>
                     <button
                       type="button"
                       className="plan-modal-toggle"
@@ -994,19 +1161,6 @@ export default function AlphaEatsSite() {
                     >
                       +
                     </button>
-                    <label className="plan-modal-field">
-                      <span>Mobile Number</span>
-                      <input
-                        type="tel"
-                        name="mobile"
-                        value={subscriptionForm.mobile}
-                        onChange={handleSubscriptionChange}
-                        placeholder="Enter your mobile number"
-                        pattern="[0-9]{10}"
-                        inputMode="numeric"
-                        required
-                      />
-                    </label>
                   </div>
 
                   {showAdditionalMobile && (
@@ -1037,6 +1191,18 @@ export default function AlphaEatsSite() {
                   </label>
 
                   <div className="plan-modal-inline-row">
+                    <label className="plan-modal-field">
+                      <span>Address</span>
+                      <input
+                        type="text"
+                        name="address"
+                        value={subscriptionForm.address}
+                        onChange={handleSubscriptionChange}
+                        placeholder="Enter your address"
+                        minLength={5}
+                        required
+                      />
+                    </label>
                     <button
                       type="button"
                       className="plan-modal-toggle"
@@ -1051,18 +1217,6 @@ export default function AlphaEatsSite() {
                     >
                       +
                     </button>
-                    <label className="plan-modal-field">
-                      <span>Address</span>
-                      <input
-                        type="text"
-                        name="address"
-                        value={subscriptionForm.address}
-                        onChange={handleSubscriptionChange}
-                        placeholder="Enter your address"
-                        minLength={5}
-                        required
-                      />
-                    </label>
                   </div>
 
                   {showAdditionalAddress && (
@@ -1079,35 +1233,98 @@ export default function AlphaEatsSite() {
                     </label>
                   )}
 
-                  <label className="plan-modal-field">
-                    <span>Choose Meal Type</span>
-                    <select name="mealType" value={subscriptionForm.mealType} onChange={handleSubscriptionChange} required>
-                      <option value="Trial Meal">Trial Meal</option>
-                      <option value="Weekly Meal">Weekly Meal</option>
-                      <option value="Monthly Meal">Monthly Meal</option>
-                    </select>
-                  </label>
-
-                  <label className="plan-modal-field">
-                    <span>Add-Ons</span>
-                    <div className="plan-modal-addon-grid">
-                      {ADD_ONS.map((addon) => {
-                        const selected = subscriptionForm.addOns.includes(addon.value);
-                        return (
+                  {planSelections.map((selection, index) => (
+                    <div key={`${selection.planName}-${index}`} className="plan-selection-card">
+                      <div className="plan-selection-head">
+                        <strong>Meal Plan {index + 1}</strong>
+                        {planSelections.length > 1 && (
                           <button
-                            key={addon.value}
                             type="button"
-                            className={`plan-modal-addon-card ${selected ? "selected" : ""}`}
-                            aria-pressed={selected}
-                            onClick={() => handleAddOnToggle(addon.value)}
+                            className="plan-selection-remove"
+                            onClick={() => {
+                              setPlanSelections((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
+                              setFormError("");
+                            }}
                           >
-                            <div className="plan-modal-addon-name">{addon.label}</div>
-                            <div className="plan-modal-addon-size">350 ML</div>
+                            Remove
                           </button>
-                        );
-                      })}
+                        )}
+                      </div>
+
+                      <div className="plan-selection-grid">
+                        <label className="plan-modal-field">
+                          <span>Choose Meal Plan</span>
+                          <select name="planName" value={selection.planName} onChange={(event) => handlePlanSelectionChange(index, event)} required>
+                            {PLANS.map((plan) => (
+                              <option key={plan.name} value={plan.name}>{plan.name}</option>
+                            ))}
+                          </select>
+                        </label>
+
+                        <div className="plan-modal-inline-row two-up">
+                          <label className="plan-modal-field">
+                            <span>Starting From</span>
+                            <input
+                              type="date"
+                              name="startDate"
+                              value={selection.startDate}
+                              onChange={(event) => handlePlanSelectionChange(index, event)}
+                              required
+                            />
+                          </label>
+                          <label className="plan-modal-field">
+                            <span>Time Slot</span>
+                            <select name="timeSlot" value={selection.timeSlot} onChange={(event) => handlePlanSelectionChange(index, event)} required>
+                              <option value="Afternoon">Afternoon</option>
+                              <option value="Evening">Evening</option>
+                              <option value="Both (Afternoon + Evening)">Both (Afternoon + Evening)</option>
+                            </select>
+                          </label>
+                        </div>
+
+                        <div className="plan-modal-inline-row two-up">
+                          <label className="plan-modal-field">
+                            <span>Choose Meal Type</span>
+                            <select name="mealType" value={selection.mealType} onChange={(event) => handlePlanSelectionChange(index, event)} required>
+                              <option value="Trial Meal">Trial Meal</option>
+                              <option value="Weekly Meal">Weekly Meal</option>
+                              <option value="Monthly Meal">Monthly Meal</option>
+                            </select>
+                          </label>
+                          <label className="plan-modal-field">
+                            <span>Meal Preference</span>
+                            <select name="mealPreference" value={selection.mealPreference} onChange={(event) => handlePlanSelectionChange(index, event)} required>
+                              <option value="VEG">VEG</option>
+                              <option value="NON-VEG">NON-VEG</option>
+                            </select>
+                          </label>
+                        </div>
+
+                        <label className="plan-modal-field">
+                          <span>Add-Ons</span>
+                          <div className="plan-modal-addon-grid">
+                            {ADD_ONS.map((addon) => {
+                              const selected = selection.addOns.includes(addon.value);
+                              return (
+                                <button
+                                  key={`${selection.planName}-${addon.value}`}
+                                  type="button"
+                                  className={`plan-modal-addon-card ${selected ? "selected" : ""}`}
+                                  aria-pressed={selected}
+                                  onClick={() => handlePlanAddOnToggle(index, addon.value)}
+                                >
+                                  <div className="plan-modal-addon-name">{addon.label}</div>
+                                  <div className="plan-modal-addon-size">350 ML</div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </label>
+                      </div>
                     </div>
-                  </label>
+                  ))}
+
+                  <button type="button" className="plan-selection-add" onClick={addMealPlanRow}>+ Add Another Meal Plan</button>
 
                   {formError && <p className="plan-modal-error">{formError}</p>}
 
