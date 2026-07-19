@@ -57,6 +57,33 @@ const PLANS = [
       weekly: "₹999",
       monthly: "₹3,999",
     },
+    saladTypePriceOptions: {
+      "Salad Only (Fresh Premium Salad)": {
+        trial: "₹169",
+        weekly: "₹999",
+        monthly: "₹3,999",
+      },
+      "Lite Protein (20–30g Protein)": {
+        trial: "₹199",
+        weekly: "₹1,299",
+        monthly: "₹5,499",
+      },
+      "Standard Protein (40–50g Protein)": {
+        trial: "₹249",
+        weekly: "₹1,649",
+        monthly: "₹6,499",
+      },
+      "High Protein (60–70g Protein)": {
+        trial: "₹299",
+        weekly: "₹1,999",
+        monthly: "₹7,999",
+      },
+      "Athlete Protein (100–120g Protein)": {
+        trial: "₹449",
+        weekly: "₹2,999",
+        monthly: "₹10,999",
+      },
+    },
     protein: "18–22g", calories: "280–360",
     audience: "Clean-eating lovers, light lunch plans",
     bullets: ["Leafy greens & protein bowls", "No heavy sauces", "Hydrating and refreshing meals"],
@@ -380,7 +407,10 @@ export default function AlphaEatsSite() {
     const plan = getSelectedPlanDetails(selection.planName);
     if (!plan) return 0;
     const priceKey = selection.mealType === "Trial Meal" ? "trial" : selection.mealType === "Weekly Meal" ? "weekly" : "monthly";
-    const priceValue = plan.priceOptions?.[priceKey];
+    const saladTypeSpecificPrice = selection.planName === "Salad Plan"
+      ? plan.saladTypePriceOptions?.[selection.saladType]?.[priceKey]
+      : null;
+    const priceValue = saladTypeSpecificPrice || plan.priceOptions?.[priceKey];
     if (!priceValue) return 0;
     const amount = Number.parseInt(priceValue.replace(/[₹,]/g, ""), 10);
     return Number.isNaN(amount) ? 0 : amount;
@@ -390,7 +420,10 @@ export default function AlphaEatsSite() {
     const plan = getSelectedPlanDetails(selection.planName);
     if (!plan) return "N/A";
     const priceKey = selection.mealType === "Trial Meal" ? "trial" : selection.mealType === "Weekly Meal" ? "weekly" : "monthly";
-    const priceValue = plan.priceOptions?.[priceKey];
+    const saladTypeSpecificPrice = selection.planName === "Salad Plan"
+      ? plan.saladTypePriceOptions?.[selection.saladType]?.[priceKey]
+      : null;
+    const priceValue = saladTypeSpecificPrice || plan.priceOptions?.[priceKey];
     return priceValue ? `${priceValue}` : `${plan.price}${plan.period || "/mo"}`;
   };
 
