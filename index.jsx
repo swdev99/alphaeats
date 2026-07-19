@@ -1,4 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
+import mealPhoto from "./images/DSC_2407.jpg";
+import mealPhotoTwo from "./images/DSC_2393.jpg";
+import mealPhotoThree from "./images/DSC_2369.jpg";
+import mealPhotoFour from "./images/img1.png";
+import mealPhotoFive from "./images/img2.png";
 
 /* ------------------------------------------------------------------
    AlphaEats — brand tokens (lifted from the reference mark)
@@ -45,6 +50,12 @@ const PLANS = [
     protein: "25–30g", calories: "350–450",
     audience: "Beginners, weight management",
     bullets: ["Low sodium, calorie-controlled", "Grilled/steamed proteins only", "Dressing packed separately"],
+    details: {
+      mealStyle: "Balanced calorie deficit meals",
+      timing: "1 meal/day or 2 meals/day based on your goals",
+      bestFor: "Goal-driven beginners, corporate professionals, and steady fat-loss routines",
+      delivery: "Morning and afternoon dispatch windows across Pune",
+    },
   },
   {
     tag: "High Protein", tagColor: "#2F5D9A",
@@ -52,6 +63,12 @@ const PLANS = [
     protein: "40–50g", calories: "500–600",
     audience: "Busy professionals, athletes, meal replacement",
     bullets: ["Lean protein priority", "Zinc-rich ingredients", "Essential micronutrient boost"],
+    details: {
+      mealStyle: "Protein-forward, satiating meal portions",
+      timing: "Prepared fresh for daily delivery with portion consistency",
+      bestFor: "Professionals needing high-performance fuel without cooking",
+      delivery: "Doorstep delivery with transparent macro labeling on every pack",
+    },
   },
   {
     tag: "Premium", tagColor: "#6B3FA0",
@@ -59,6 +76,12 @@ const PLANS = [
     protein: "60–70g", calories: "850–900",
     audience: "Serious fitness goals, body recomposition",
     bullets: ["Omega-3 sources 3x/week", "Three-compartment packing", "Premium A-grade proteins"],
+    details: {
+      mealStyle: "Premium recovery-focused macro control",
+      timing: "Ideal for multi-meal performance routines and recovery windows",
+      bestFor: "Body recomposition, lean muscle gain, and advanced training goals",
+      delivery: "Premium packed meals with clear nutrition breakdown and replenishment support",
+    },
   },
   {
     tag: "High Performance", tagColor: "#B5651D",
@@ -66,6 +89,12 @@ const PLANS = [
     protein: "100–120g", calories: "1,100–1,300",
     audience: "Athletes training 5+ days/week, strength training",
     bullets: ["Multi-source protein blend", "Electrolyte-enhanced", "2x portion volume"],
+    details: {
+      mealStyle: "High-volume, high-performance fuel strategy",
+      timing: "Built for heavy training days and endurance output",
+      bestFor: "Athletes and strength-focused members with demanding calorie requirements",
+      delivery: "Higher-volume dispatch setup with routine tracking and repeat delivery support",
+    },
   },
 ];
 
@@ -145,6 +174,39 @@ const CONTACT = {
   address: "Pune, Maharashtra, India",
 };
 
+const HOME_SLIDES = [
+  {
+    image: mealPhoto,
+    eyebrow: "Fresh. Macro-Accurate.",
+    title: "Fuel the Future of Fitness in India",
+    copy: "Goal-based nutrition delivered daily — with precision meals, transparent macros, and consistent energy.",
+  },
+  {
+    image: mealPhotoTwo,
+    eyebrow: "Chef-Quality Meals",
+    title: "Meals Built for Results",
+    copy: "From fat loss to athletic performance, every plan is crafted to support performance and recovery.",
+  },
+  {
+    image: mealPhotoThree,
+    eyebrow: "Daily Doorstep Delivery",
+    title: "Your Nutrition Routine, Simplified",
+    copy: "A full-screen branded experience that turns daily meal delivery into a premium health ritual.",
+  },
+  {
+    image: mealPhotoFour,
+    eyebrow: "Premium Presentation",
+    title: "Beautifully Packed. Perfectly Prepared.",
+    copy: "Every delivery is positioned as a premium wellness ritual with clean presentation and consistent quality.",
+  },
+  {
+    image: mealPhotoFive,
+    eyebrow: "Consistency at Scale",
+    title: "Branded Nutrition for Busy Lives",
+    copy: "From busy professionals to serious athletes, AlphaEats removes the daily friction of staying on-plan.",
+  },
+];
+
 function useReveal() {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -198,7 +260,7 @@ function FullLogo({ width = 340 }) {
     <img
       src={LOGO_FULL}
       alt="AlphaEats — Fueling the Future of Fitness in India"
-      style={{ width, maxWidth: "100%", display: "block" }}
+      style={{ width, maxWidth: "100%", display: "block", marginBottom: 24 }}
       draggable={false}
     />
   );
@@ -223,6 +285,96 @@ function NavLogo() {
 }
 
 export default function AlphaEatsSite() {
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [showAdditionalMobile, setShowAdditionalMobile] = useState(false);
+  const [showAdditionalAddress, setShowAdditionalAddress] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [subscriptionForm, setSubscriptionForm] = useState({
+    name: "",
+    mobile: "",
+    additionalMobile: "",
+    email: "",
+    address: "",
+    additionalAddress: "",
+    mealType: "Trial Meal",
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % HOME_SLIDES.length);
+    }, 2500);
+    return () => clearInterval(timer);
+  }, []);
+
+  const activeSlideData = HOME_SLIDES[activeSlide];
+  const selectedPlanData = selectedPlan ? PLANS.find((plan) => plan.name === selectedPlan) : null;
+
+  const handleSubscriptionChange = (event) => {
+    const { name, value } = event.target;
+    setFormError("");
+    setSubscriptionForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubscriptionSubmit = (event) => {
+    event.preventDefault();
+
+    const name = subscriptionForm.name.trim();
+    const mobile = subscriptionForm.mobile.trim();
+    const additionalMobile = subscriptionForm.additionalMobile.trim();
+    const email = subscriptionForm.email.trim();
+    const address = subscriptionForm.address.trim();
+    const additionalAddress = subscriptionForm.additionalAddress.trim();
+    const mealType = subscriptionForm.mealType;
+
+    if (name.length < 2) {
+      setFormError("Please enter a valid name.");
+      return;
+    }
+
+    if (!/^\d{10}$/.test(mobile)) {
+      setFormError("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setFormError("Please enter a valid email address.");
+      return;
+    }
+
+    if (address.length < 5) {
+      setFormError("Please enter a valid address.");
+      return;
+    }
+
+    if (showAdditionalMobile && additionalMobile && !/^\d{10}$/.test(additionalMobile)) {
+      setFormError("Please enter a valid additional mobile number.");
+      return;
+    }
+
+    if (showAdditionalAddress && additionalAddress.length < 5) {
+      setFormError("Please enter a valid additional address.");
+      return;
+    }
+
+    const message = `Hi AlphaEats, I want to request a subscription.\n\nPlan: ${selectedPlanData.name}\nName: ${name}\nMobile: ${mobile}\nAdditional Mobile: ${additionalMobile || "N/A"}\nEmail: ${email}\nAddress: ${address}\nAdditional Address: ${additionalAddress || "N/A"}\nMeal Type: ${mealType}`;
+    const waUrl = `https://wa.me/918805051500?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, "_blank", "noopener,noreferrer");
+    setSelectedPlan(null);
+    setShowAdditionalMobile(false);
+    setShowAdditionalAddress(false);
+    setFormError("");
+    setSubscriptionForm({
+      name: "",
+      mobile: "",
+      additionalMobile: "",
+      email: "",
+      address: "",
+      additionalAddress: "",
+      mealType: "Trial Meal",
+    });
+  };
+
   return (
     <div className="ae-root">
       <style>{`
@@ -249,8 +401,8 @@ export default function AlphaEatsSite() {
 
         .eyebrow {
           display: flex; align-items: center; gap: 12px;
-          color: var(--gold); font-size: 0.72rem; letter-spacing: 0.28em;
-          text-transform: uppercase; font-weight: 600; margin-bottom: 18px;
+          color: var(--gold); font-size: 0.9rem; letter-spacing: 0.22em;
+          text-transform: uppercase; font-weight: 700; margin-bottom: 18px;
         }
         .eyebrow-rule { width: 28px; height: 1px; background: var(--gold); }
         .light .eyebrow { color: #9C7A22; }
@@ -275,29 +427,77 @@ export default function AlphaEatsSite() {
         }
         .nav-cta:hover { background: var(--gold); color: var(--navy); }
 
-        /* HERO — split panel echoing the source layout */
+        /* HERO — full-screen animated slideshow */
         .hero {
-          display: grid; grid-template-columns: 1.05fr 1px 1fr;
-          min-height: 86vh;
-        }
-        .hero-left {
-          padding: 8vw 6vw; display: flex; flex-direction: column; justify-content: center;
           position: relative;
+          min-height: 100vh;
+          overflow: hidden;
+          display: grid;
+          align-items: center;
         }
-        .hero-divider { background: linear-gradient(180deg, transparent, var(--gold), transparent); }
-        .hero-right {
+        .hero-slide {
+          position: absolute;
+          inset: 0;
+          opacity: 0;
+          transform: scale(1.08);
+          transition: opacity 1.2s ease, transform 6s ease;
+        }
+        .hero-slide.active {
+          opacity: 1;
+          transform: scale(1);
+        }
+        .hero-slide img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          filter: saturate(0.95) contrast(1.04) brightness(0.68);
+        }
+        .hero-overlay {
+          position: absolute;
+          inset: 0;
           background:
-            linear-gradient(160deg, rgba(19,27,39,0.55), rgba(19,27,39,0.85)),
-            repeating-linear-gradient(115deg, #7a5a24 0 2px, #6b4d1f 2px 42px);
-          padding: 8vw 5vw; display: flex; flex-direction: column; justify-content: center;
-          position: relative; overflow: hidden;
+            linear-gradient(90deg, rgba(19,27,39,0.88) 0%, rgba(19,27,39,0.55) 42%, rgba(19,27,39,0.72) 100%),
+            radial-gradient(circle at top left, rgba(201,162,75,0.25), transparent 40%);
+          z-index: 1;
         }
-        .hero-right::before {
-          content: ""; position: absolute; inset: 0;
-          background: radial-gradient(circle at 30% 20%, rgba(201,162,75,0.16), transparent 55%);
+        .hero-content {
+          position: relative;
+          z-index: 2;
+          width: min(760px, 100%);
+          padding: 10vw 6vw 6vw;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
         }
-        .hero-rule { width: 96px; height: 3px; background: var(--gold); margin: 30px 0 26px 0; }
-        .hero-quote { font-style: italic; color: var(--slate); font-size: 1.05rem; max-width: 380px; border-left: 2px solid var(--gold); padding-left: 16px; }
+        .hero-rule { display: none; }
+        .hero-quote {
+          font-style: italic; color: var(--bone);
+          font-size: 1.22rem; max-width: 680px;
+          border-left: 2px solid var(--gold);
+          padding-left: 16px; line-height: 1.78;
+        }
+        .hero-cta-row {
+          display: flex; gap: 14px; flex-wrap: wrap; margin-top: 28px;
+        }
+        .hero-cta {
+          display: inline-flex; align-items: center; justify-content: center;
+          padding: 12px 22px; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
+          text-decoration: none; font-weight: 700;
+        }
+        .hero-cta.primary {
+          background: var(--gold); color: var(--navy); border: 1px solid var(--gold);
+        }
+        .hero-cta.secondary {
+          color: var(--bone); border: 1px solid rgba(255,255,255,0.26); background: rgba(255,255,255,0.04);
+        }
+        .hero-pagination {
+          display: flex; gap: 8px; margin-top: 28px;
+        }
+        .hero-dot {
+          width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.35); border: none; cursor: pointer;
+        }
+        .hero-dot.active { background: var(--gold); }
 
         .why-heading { font-family: 'Playfair Display', serif; font-size: 2.1rem; color: var(--gold-l); margin-bottom: 34px; font-weight: 700; }
         .why-list { display: flex; flex-direction: column; gap: 26px; position: relative; z-index: 1; }
@@ -309,7 +509,7 @@ export default function AlphaEatsSite() {
         .section { padding: 8vw 6vw; }
         .section-head { max-width: 680px; margin-bottom: 52px; }
         .section-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 3.4vw, 2.8rem); font-weight: 700; color: var(--bone); }
-        .section-sub { color: var(--slate); margin-top: 14px; font-size: 1.02rem; line-height: 1.6; }
+        .section-sub { color: var(--slate); margin-top: 14px; font-size: 1.12rem; line-height: 1.7; }
         .light { background: var(--paper); color: var(--ink); }
         .light .section-title { color: var(--ink); }
         .light .section-sub { color: #5B6472; }
@@ -344,13 +544,79 @@ export default function AlphaEatsSite() {
 
         /* PLAN CATALOGUE */
         .plan-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
-        .plan-card-2 { background: #fff; border: 1px solid #E5E3DC; overflow: hidden; display: flex; flex-direction: column; }
+        .plan-card-2 {
+          background: #fff; border: 1px solid #E5E3DC; overflow: hidden; display: flex;
+          flex-direction: column; box-shadow: 0 8px 24px rgba(19,27,39,0.06);
+          transition: transform .25s ease, box-shadow .25s ease;
+        }
+        .plan-card-2:hover { transform: translateY(-4px); box-shadow: 0 14px 34px rgba(19,27,39,0.12); }
         .plan-tag { padding: 16px 22px; color: #fff; font-weight: 700; font-size: 0.95rem; }
         .plan-body { padding: 26px 22px; flex: 1; display: flex; flex-direction: column; }
         .plan-name-2 { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.3rem; color: var(--ink); margin-bottom: 4px; }
         .plan-price { font-size: 1.5rem; font-weight: 700; color: var(--ink); margin-bottom: 18px; }
         .plan-price span { font-size: 0.95rem; font-weight: 500; color: #8B93A3; }
         .plan-stats-2 { display: flex; gap: 10px; margin-bottom: 18px; }
+        .plan-more-btn {
+          margin-top: auto; margin-left: auto; display: inline-flex; align-items: center; justify-content: center;
+          width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--gold);
+          background: transparent; color: var(--ink); cursor: pointer; transition: all .25s ease;
+        }
+        .plan-more-btn:hover {
+          background: #C9A24B; color: #131B27; transform: translateY(-2px);
+          box-shadow: 0 8px 18px rgba(201,162,75,0.28);
+        }
+        .plan-more-icon {
+          font-size: 1rem; line-height: 1; font-weight: 900;
+          transform: rotate(45deg);
+        }
+        .plan-modal-overlay {
+          position: fixed; inset: 0; background: rgba(9, 13, 20, 0.76); z-index: 80;
+          display: flex; align-items: center; justify-content: center; padding: 24px;
+        }
+        .plan-modal {
+          width: min(560px, 100%); background: #fff; border: 1px solid #E6DED0;
+          box-shadow: 0 24px 70px rgba(0,0,0,0.28); color: var(--ink);
+        }
+        .plan-modal-head { padding: 18px 22px; color: #fff; }
+        .plan-modal-body { padding: 22px; }
+        .plan-modal-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; }
+        .plan-modal-text { font-size: 0.95rem; color: #4B5563; line-height: 1.65; margin-bottom: 14px; }
+        .plan-modal-list { margin: 0; padding-left: 18px; color: #374151; }
+        .plan-modal-list li { margin-bottom: 8px; }
+        .plan-modal-actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+        .plan-modal-form { display: grid; gap: 14px; }
+        .plan-modal-field { display: grid; gap: 6px; }
+        .plan-modal-field span { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #374151; }
+        .plan-modal-field input,
+        .plan-modal-field select {
+          width: 100%; padding: 12px 14px; border: 1px solid #D6D0C5; background: #fff; color: var(--ink);
+          font-size: 0.96rem; box-sizing: border-box;
+        }
+        .plan-modal-field input:focus,
+        .plan-modal-field select:focus { outline: 2px solid rgba(201,162,75,0.28); border-color: var(--gold); }
+        .plan-modal-inline-row {
+          display: flex; align-items: flex-end; gap: 10px;
+        }
+        .plan-modal-inline-row .plan-modal-field {
+          flex: 1; min-width: 0;
+        }
+        .plan-modal-toggle {
+          border: 1px solid var(--gold); background: transparent; color: var(--ink); padding: 0;
+          font-size: 1rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer;
+          width: 48px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
+          flex-shrink: 0; margin-bottom: 0;
+        }
+        .plan-modal-error {
+          color: #b42318; font-size: 0.82rem; font-weight: 600; margin: 0;
+        }
+        .plan-modal-request {
+          padding: 12px 18px; background: var(--gold); color: var(--navy); border: none;
+          text-decoration: none; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer;
+        }
+        .plan-modal-close {
+          padding: 12px 18px; border: 1px solid #D6D0C5; background: transparent; color: var(--ink);
+          cursor: pointer; font-weight: 700; font-size: 0.82rem;
+        }
         .plan-stat-box { flex: 1; background: #F5F3EC; padding: 10px 12px; text-align: center; }
         .plan-stat-box .num { font-weight: 700; color: var(--ink); font-size: 0.95rem; }
         .plan-stat-box .lbl { font-size: 0.72rem; color: #8B93A3; text-transform: uppercase; letter-spacing: 0.04em; }
@@ -456,27 +722,39 @@ export default function AlphaEatsSite() {
           <a href="#zones">Coverage</a>
           <a href="#contact">Contact</a>
         </div>
-        <button className="nav-cta">Start a Plan</button>
       </nav>
 
       {/* HERO */}
       <div className="hero">
-        <div className="hero-left">
+        {HOME_SLIDES.map((slide, index) => (
+          <div key={slide.title} className={`hero-slide ${index === activeSlide ? "active" : ""}`}>
+            <img src={slide.image} alt={slide.title} />
+          </div>
+        ))}
+        <div className="hero-overlay" />
+
+        <div className="hero-content">
           <FullLogo width={320} />
-          <div className="hero-rule" />
-          <p className="hero-quote">&ldquo;To make India better with healthy people.&rdquo;</p>
-        </div>
-        <div className="hero-divider" />
-        <div className="hero-right" id="why">
-          <h2 className="why-heading">Why AlphaEats?</h2>
-          <div className="why-list">
-            {WHY.map((f, i) => (
-              <Reveal key={f.title} delay={i * 70}>
-                <div className="why-item">
-                  <span className="why-mark">{f.mark}</span>
-                  <span className="why-text">{f.title}</span>
-                </div>
-              </Reveal>
+          <div className="eyebrow" style={{ marginTop: 4, marginBottom: 12 }}>
+            <span className="eyebrow-rule" />
+            {activeSlideData.eyebrow}
+          </div>
+          <h1 className="section-title display" style={{ maxWidth: 680, fontSize: 'clamp(2.5rem, 5vw, 4.6rem)', lineHeight: 1.06, margin: '0 0 14px' }}>
+            {activeSlideData.title}
+          </h1>
+          <p className="hero-quote">{activeSlideData.copy}</p>
+          <div className="hero-cta-row">
+            <a className="hero-cta primary" href="#plans">Start a Plan</a>
+            <a className="hero-cta secondary" href="#about">See More</a>
+          </div>
+          <div className="hero-pagination">
+            {HOME_SLIDES.map((slide, index) => (
+              <button
+                key={slide.title}
+                className={`hero-dot ${index === activeSlide ? "active" : ""}`}
+                onClick={() => setActiveSlide(index)}
+                aria-label={`Show slide ${index + 1}`}
+              />
             ))}
           </div>
         </div>
@@ -487,25 +765,24 @@ export default function AlphaEatsSite() {
         <div className="about-grid">
           <Reveal>
             <div>
-              <SectionLabel>About Us</SectionLabel>
-              <h2 className="section-title" style={{ marginBottom: 26 }}>More Than a Meal. A Movement.</h2>
+              <SectionLabel>About AlphaEats</SectionLabel>
+              <h2 className="section-title" style={{ marginBottom: 26 }}>Fueling India's Health Revolution</h2>
               <div className="about-copy">
-                <p>AlphaEats is dedicated to making India better by empowering healthy people. We believe that achieving your fitness and lifestyle goals starts in the kitchen.</p>
-                <p>Whether you are an office professional seeking balance, a beginner on a weight-loss journey, or a serious athlete demanding peak performance — hitting your daily protein and micronutrient goals shouldn't be a struggle.</p>
-                <p>We have created a comprehensive range of expertly crafted, macro-calculated meals designed to fit seamlessly into any lifestyle, ensuring you get the exact nutrition you need without the hassle of prep and cooking.</p>
+                <p>At <em>AlphaEats</em>, we believe healthy eating should never be boring, complicated, or out of reach. We are on a mission to transform the way India eats by delivering fresh, high-protein, nutrition-focused meals that help people achieve their health and fitness goals without sacrificing taste or convenience.</p>
+                <p>Whether you're working towards weight loss, muscle gain, improved performance, or simply a healthier lifestyle, every AlphaEats meal is thoughtfully prepared using fresh ingredients, balanced nutrition, and premium-quality standards.</p>
+                <p>Our goal isn't just to deliver food — we're here to build healthier habits, inspire confidence, and create a community that chooses wellness every single day.</p>
               </div>
               <div className="promise-box">
-                <div className="promise-label">Our Core Promise</div>
-                <div className="promise-text">100% Macro-Accurate Protein Meals prepared with Uncompromising Hygiene Standards.</div>
+                <div className="promise-label">Our Mission</div>
+                <div className="promise-text">To make healthy eating simple, delicious, affordable, and accessible—one meal at a time.</div>
               </div>
             </div>
           </Reveal>
           <Reveal delay={120}>
             <div>
               <div className="about-photo">
-                <div className="food-swatch">Veg Meal Box photo</div>
+                <img src={mealPhoto} alt="Veg meal box presentation" />
               </div>
-              <div className="about-caption">Veg Meal Box · AlphaEats</div>
             </div>
           </Reveal>
         </div>
@@ -569,7 +846,6 @@ export default function AlphaEatsSite() {
                 <div className="plan-tag" style={{ background: p.tagColor }}>{p.tag}</div>
                 <div className="plan-body">
                   <div className="plan-name-2">{p.name}</div>
-                  <div className="plan-price">{p.price}<span>{p.period}</span></div>
                   <div className="plan-stats-2">
                     <div className="plan-stat-box"><div className="num">{p.protein}</div><div className="lbl">Protein</div></div>
                     <div className="plan-stat-box"><div className="num">{p.calories}</div><div className="lbl">Calories</div></div>
@@ -578,11 +854,173 @@ export default function AlphaEatsSite() {
                   <ul className="plan-bullets">
                     {p.bullets.map((b) => <li key={b}>{b}</li>)}
                   </ul>
+                  <button className="plan-more-btn" onClick={() => setSelectedPlan(p.name)} aria-label={`Know more about ${p.name}`}>
+                    <span className="plan-more-icon">↗</span>
+                  </button>
                 </div>
               </div>
             </Reveal>
           ))}
         </div>
+
+        {selectedPlanData && (
+          <div className="plan-modal-overlay" onClick={() => setSelectedPlan(null)}>
+            <div className="plan-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="plan-modal-head" style={{ background: PLANS.find((plan) => plan.name === selectedPlanData.name)?.tagColor }}>
+                <div className="plan-modal-title">{selectedPlanData.name}</div>
+                <div style={{ fontSize: "0.85rem", letterSpacing: "0.08em", textTransform: "uppercase", opacity: 0.92 }}>
+                  {selectedPlanData.tag}
+                </div>
+              </div>
+              <div className="plan-modal-body">
+                <div className="plan-modal-text">
+                  {selectedPlanData.audience}. Designed to deliver consistent nutrition with macro-aware portioning and premium food quality.
+                </div>
+                <ul className="plan-modal-list">
+                  <li><strong>Meal style:</strong> {selectedPlanData.details.mealStyle}</li>
+                  <li><strong>Timing:</strong> {selectedPlanData.details.timing}</li>
+                  <li><strong>Best for:</strong> {selectedPlanData.details.bestFor}</li>
+                  <li><strong>Delivery:</strong> {selectedPlanData.details.delivery}</li>
+                </ul>
+                <form className="plan-modal-form" onSubmit={handleSubscriptionSubmit}>
+                  <label className="plan-modal-field">
+                    <span>Name</span>
+                    <input
+                      type="text"
+                      name="name"
+                      value={subscriptionForm.name}
+                      onChange={handleSubscriptionChange}
+                      placeholder="Enter your name"
+                      minLength={2}
+                      required
+                    />
+                  </label>
+
+                  <div className="plan-modal-inline-row">
+                    <button
+                      type="button"
+                      className="plan-modal-toggle"
+                      aria-label="Add extra mobile number"
+                      onClick={() => {
+                        setShowAdditionalMobile((prev) => !prev);
+                        setFormError("");
+                        if (!showAdditionalMobile) {
+                          setSubscriptionForm((prev) => ({ ...prev, additionalMobile: "" }));
+                        }
+                      }}
+                    >
+                      +
+                    </button>
+                    <label className="plan-modal-field">
+                      <span>Mobile Number</span>
+                      <input
+                        type="tel"
+                        name="mobile"
+                        value={subscriptionForm.mobile}
+                        onChange={handleSubscriptionChange}
+                        placeholder="Enter your mobile number"
+                        pattern="[0-9]{10}"
+                        inputMode="numeric"
+                        required
+                      />
+                    </label>
+                  </div>
+
+                  {showAdditionalMobile && (
+                    <label className="plan-modal-field">
+                      <span>Additional Number</span>
+                      <input
+                        type="tel"
+                        name="additionalMobile"
+                        value={subscriptionForm.additionalMobile}
+                        onChange={handleSubscriptionChange}
+                        placeholder="Enter alternate mobile number"
+                        pattern="[0-9]{10}"
+                        inputMode="numeric"
+                      />
+                    </label>
+                  )}
+
+                  <label className="plan-modal-field">
+                    <span>Email</span>
+                    <input
+                      type="email"
+                      name="email"
+                      value={subscriptionForm.email}
+                      onChange={handleSubscriptionChange}
+                      placeholder="Enter your email address"
+                      required
+                    />
+                  </label>
+
+                  <div className="plan-modal-inline-row">
+                    <button
+                      type="button"
+                      className="plan-modal-toggle"
+                      aria-label="Add extra address"
+                      onClick={() => {
+                        setShowAdditionalAddress((prev) => !prev);
+                        setFormError("");
+                        if (!showAdditionalAddress) {
+                          setSubscriptionForm((prev) => ({ ...prev, additionalAddress: "" }));
+                        }
+                      }}
+                    >
+                      +
+                    </button>
+                    <label className="plan-modal-field">
+                      <span>Address</span>
+                      <input
+                        type="text"
+                        name="address"
+                        value={subscriptionForm.address}
+                        onChange={handleSubscriptionChange}
+                        placeholder="Enter your address"
+                        minLength={5}
+                        required
+                      />
+                    </label>
+                  </div>
+
+                  {showAdditionalAddress && (
+                    <label className="plan-modal-field">
+                      <span>Additional Address</span>
+                      <input
+                        type="text"
+                        name="additionalAddress"
+                        value={subscriptionForm.additionalAddress}
+                        onChange={handleSubscriptionChange}
+                        placeholder="Enter another address"
+                        minLength={5}
+                      />
+                    </label>
+                  )}
+
+                  <label className="plan-modal-field">
+                    <span>Choose Meal Type</span>
+                    <select name="mealType" value={subscriptionForm.mealType} onChange={handleSubscriptionChange} required>
+                      <option value="Trial Meal">Trial Meal</option>
+                      <option value="Weekly Meal">Weekly Meal</option>
+                      <option value="Monthly Meal">Monthly Meal</option>
+                    </select>
+                  </label>
+
+                  {formError && <p className="plan-modal-error">{formError}</p>}
+
+                  <div className="plan-modal-actions">
+                    <button type="submit" className="plan-modal-request">Request Subscription</button>
+                    <button type="button" className="plan-modal-close" onClick={() => {
+                      setSelectedPlan(null);
+                      setShowAdditionalMobile(false);
+                      setShowAdditionalAddress(false);
+                      setFormError("");
+                    }}>Close</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* HOW IT WORKS */}
@@ -635,41 +1073,6 @@ export default function AlphaEatsSite() {
         </Reveal>
       </section>
 
-      {/* BUSINESS MODEL */}
-      <section className="section">
-        <Reveal>
-          <div className="section-head">
-            <SectionLabel>Business Model</SectionLabel>
-            <h2 className="section-title display">Recurring Subscriptions, Daily Delivery Touchpoints</h2>
-          </div>
-        </Reveal>
-        <div className="tier-grid">
-          {PRICING_TIERS.map((t, i) => (
-            <Reveal key={t.name} delay={i * 80}>
-              <div className="tier-card">
-                <div className="tier-name">{t.name}</div>
-                <div className="tier-span">{t.span}</div>
-                {t.rows.map((r) => (
-                  <div className="tier-row" key={r.desc}>
-                    <span className="tier-price">{r.price}</span>
-                    <span className="tier-desc">{r.desc}</span>
-                  </div>
-                ))}
-              </div>
-            </Reveal>
-          ))}
-        </div>
-        <Reveal delay={150}>
-          <div className="drivers-title">Revenue Drivers</div>
-          {REVENUE_DRIVERS.map((d) => (
-            <div className="driver-row" key={d.copy}>
-              <span className="driver-icon">{d.icon}</span>
-              <span className="driver-copy">{d.copy}</span>
-            </div>
-          ))}
-        </Reveal>
-      </section>
-
       {/* VISION & ROADMAP */}
       <section className="section light">
         <Reveal>
@@ -706,7 +1109,6 @@ export default function AlphaEatsSite() {
         <Reveal>
           <Crest size={48} />
           <h2 className="cta-title" style={{ marginTop: 20 }}>Ready to transform your nutrition?</h2>
-          <button className="cta-btn">Choose Your Plan</button>
         </Reveal>
       </section>
 
