@@ -1400,7 +1400,13 @@ export default function AlphaEatsSite() {
                       <div className="plan-selection-grid">
                         <label className="plan-modal-field">
                           <span>Choose Meal Plan</span>
-                          <select name="planName" value={selection.planName} onChange={(event) => handlePlanSelectionChange(index, event)} required>
+                          <select
+                            name="planName"
+                            value={selection.planName}
+                            onChange={(event) => handlePlanSelectionChange(index, event)}
+                            required
+                            disabled={index === 0}
+                          >
                             {PLANS.map((plan) => (
                               <option key={plan.name} value={plan.name}>{plan.name}</option>
                             ))}
