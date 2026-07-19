@@ -349,6 +349,17 @@ export default function AlphaEatsSite() {
   const activeSlideData = HOME_SLIDES[activeSlide];
   const selectedPlanData = selectedPlan ? PLANS.find((plan) => plan.name === selectedPlan) : null;
 
+  const getSelectedPlanDetails = (planName) => PLANS.find((plan) => plan.name === planName) || null;
+
+  const getPlanAmount = (planName) => {
+    const plan = getSelectedPlanDetails(planName);
+    if (!plan?.price) return 0;
+    const amount = Number.parseInt(plan.price.replace(/[₹,]/g, ""), 10);
+    return Number.isNaN(amount) ? 0 : amount;
+  };
+
+  const checkoutAmount = planSelections.reduce((total, selection) => total + getPlanAmount(selection.planName), 0);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % HOME_SLIDES.length);
@@ -392,7 +403,14 @@ export default function AlphaEatsSite() {
   const handlePlanSelectionChange = (index, event) => {
     const { name, value } = event.target;
     setFormError("");
-    setPlanSelections((prev) => prev.map((item, itemIndex) => itemIndex === index ? { ...item, [name]: value } : item));
+    setPlanSelections((prev) => prev.map((item, itemIndex) => {
+      if (itemIndex !== index) return item;
+      const updatedItem = { ...item, [name]: value };
+      if (name === "planName" && value === "Salad Plan" && !updatedItem.saladType) {
+        updatedItem.saladType = "Salad Only (Fresh Premium Salad)";
+      }
+      return updatedItem;
+    }));
   };
 
   const handlePlanAddOnToggle = (index, value) => {
@@ -416,6 +434,8 @@ export default function AlphaEatsSite() {
         startDate: "",
         timeSlot: "Afternoon",
         mealType: "Trial Meal",
+        mealPreference: "VEG",
+        saladType: "Salad Only (Fresh Premium Salad)",
         addOns: [],
       },
     ]);
@@ -477,8 +497,12 @@ export default function AlphaEatsSite() {
       return;
     }
 
-    const planSummary = planSelections.map((selection, index) => `Meal Plan ${index + 1}: ${selection.planName}\nStarting From: ${selection.startDate}\nTime Slot: ${selection.timeSlot}\nMeal Type: ${selection.mealType}\nMeal Preference: ${selection.mealPreference || "VEG"}\nSalad Type: ${selection.planName === "Salad Plan" ? (selection.saladType || "Salad Only (Fresh Premium Salad)") : "N/A"}\nAdd-Ons: ${selection.addOns.length ? selection.addOns.join(", ") : "N/A"}`).join("\n\n");
-    const message = `Hi AlphaEats, I want to request a subscription.\n\nName: ${name}\nMobile: ${mobile}\nAdditional Mobile: ${additionalMobile || "N/A"}\nEmail: ${email}\nAddress: ${address}\nAdditional Address: ${additionalAddress || "N/A"}\n\n${planSummary}`;
+    const planSummary = planSelections.map((selection, index) => {
+      const planDetails = getSelectedPlanDetails(selection.planName);
+      const planPrice = planDetails ? `${planDetails.price}${planDetails.period || "/mo"}` : "N/A";
+      return `Meal Plan ${index + 1}: ${selection.planName}\nPlan Price: ${planPrice}\nStarting From: ${selection.startDate}\nTime Slot: ${selection.timeSlot}\nMeal Type: ${selection.mealType}\nMeal Preference: ${selection.mealPreference || "VEG"}\nSalad Type: ${selection.planName === "Salad Plan" ? (selection.saladType || "Salad Only (Fresh Premium Salad)") : "N/A"}\nAdd-Ons: ${selection.addOns.length ? selection.addOns.join(", ") : "N/A"}`;
+    }).join("\n\n");
+    const message = `Hi AlphaEats, I want to request a subscription.\n\nName: ${name}\nMobile: ${mobile}\nAdditional Mobile: ${additionalMobile || "N/A"}\nEmail: ${email}\nAddress: ${address}\nAdditional Address: ${additionalAddress || "N/A"}\n\nCheckout Amount: ₹${checkoutAmount.toLocaleString("en-IN")}\n\n${planSummary}`;
     const waUrl = `https://wa.me/918805051500?text=${encodeURIComponent(message)}`;
     window.open(waUrl, "_blank", "noopener,noreferrer");
     setSelectedPlan(null);
@@ -500,7 +524,6 @@ export default function AlphaEatsSite() {
         timeSlot: "Both (Afternoon + Evening)",
         mealType: "Trial Meal",
         mealPreference: "VEG",
-        saladType: "Salad Only (Fresh Premium Salad)",
         saladType: "Salad Only (Fresh Premium Salad)",
         addOns: [],
       },
@@ -737,6 +760,21 @@ export default function AlphaEatsSite() {
         .plan-selection-grid { display: grid; gap: 10px; }
         .plan-selection-remove { border: 1px solid #B42318; color: #B42318; background: transparent; padding: 8px 10px; font-weight: 700; cursor: pointer; }
         .plan-selection-add { border: 1px solid var(--gold); background: transparent; color: var(--ink); padding: 10px 12px; font-weight: 700; cursor: pointer; }
+        .plan-selection-price {
+          display: flex; align-items: center; justify-content: space-between; gap: 10px;
+          padding: 10px 12px; border: 1px solid #E6DED0; background: #FFFDF7; color: var(--ink);
+        }
+        .plan-selection-price span { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #5B6472; }
+        .plan-selection-price strong { font-size: 0.95rem; color: var(--ink); }
+        .plan-modal-summary {
+          border: 1px solid #E6DED0; background: #FBFAF7; padding: 12px; display: grid; gap: 10px;
+        }
+        .plan-modal-summary-title { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #374151; }
+        .plan-modal-summary-item { display: flex; justify-content: space-between; gap: 12px; font-size: 0.9rem; color: #374151; }
+        .plan-modal-total {
+          display: flex; justify-content: space-between; gap: 12px; align-items: center;
+          padding-top: 8px; border-top: 1px solid #E6DED0; font-weight: 700; color: var(--ink);
+        }
         .plan-modal-field { display: grid; gap: 6px; }
         .plan-modal-field span { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #374151; }
         .plan-modal-field input,
@@ -1260,10 +1298,20 @@ export default function AlphaEatsSite() {
                           <span>Choose Meal Plan</span>
                           <select name="planName" value={selection.planName} onChange={(event) => handlePlanSelectionChange(index, event)} required>
                             {PLANS.map((plan) => (
-                              <option key={plan.name} value={plan.name}>{plan.name}</option>
+                              <option key={plan.name} value={plan.name}>{plan.name} — {plan.price}{plan.period}</option>
                             ))}
                           </select>
                         </label>
+
+                        {selection.planName && (() => {
+                          const selectedPlan = getSelectedPlanDetails(selection.planName);
+                          return (
+                            <div className="plan-selection-price">
+                              <span>Selected Plan Price</span>
+                              <strong>{selectedPlan ? `${selectedPlan.price}${selectedPlan.period || "/mo"}` : "N/A"}</strong>
+                            </div>
+                          );
+                        })()}
 
                         <div className="plan-modal-inline-row two-up">
                           <label className="plan-modal-field">
@@ -1342,6 +1390,23 @@ export default function AlphaEatsSite() {
                   ))}
 
                   <button type="button" className="plan-selection-add" onClick={addMealPlanRow}>+ Add Another Meal Plan</button>
+
+                  <div className="plan-modal-summary" aria-live="polite">
+                    <div className="plan-modal-summary-title">Checkout Summary</div>
+                    {planSelections.map((selection, index) => {
+                      const selectedPlan = getSelectedPlanDetails(selection.planName);
+                      return (
+                        <div key={`${selection.planName}-${index}`} className="plan-modal-summary-item">
+                          <span>Meal Plan {index + 1}: {selection.planName}</span>
+                          <strong>{selectedPlan ? `${selectedPlan.price}${selectedPlan.period || "/mo"}` : "N/A"}</strong>
+                        </div>
+                      );
+                    })}
+                    <div className="plan-modal-total">
+                      <span>Final Checkout Amount</span>
+                      <span>₹{checkoutAmount.toLocaleString("en-IN")}</span>
+                    </div>
+                  </div>
 
                   {formError && <p className="plan-modal-error">{formError}</p>}
 
