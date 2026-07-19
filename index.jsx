@@ -333,6 +333,7 @@ export default function AlphaEatsSite() {
       timeSlot: "Both (Afternoon + Evening)",
       mealType: "Trial Meal",
       mealPreference: "VEG",
+      saladType: "Salad Only (Fresh Premium Salad)",
       addOns: [],
     },
   ]);
@@ -364,6 +365,7 @@ export default function AlphaEatsSite() {
           timeSlot: "Both (Afternoon + Evening)",
           mealType: "Trial Meal",
           mealPreference: "VEG",
+          saladType: "Salad Only (Fresh Premium Salad)",
           addOns: [],
         },
       ]);
@@ -475,7 +477,7 @@ export default function AlphaEatsSite() {
       return;
     }
 
-    const planSummary = planSelections.map((selection, index) => `Meal Plan ${index + 1}: ${selection.planName}\nStarting From: ${selection.startDate}\nTime Slot: ${selection.timeSlot}\nMeal Type: ${selection.mealType}\nMeal Preference: ${selection.mealPreference || "VEG"}\nAdd-Ons: ${selection.addOns.length ? selection.addOns.join(", ") : "N/A"}`).join("\n\n");
+    const planSummary = planSelections.map((selection, index) => `Meal Plan ${index + 1}: ${selection.planName}\nStarting From: ${selection.startDate}\nTime Slot: ${selection.timeSlot}\nMeal Type: ${selection.mealType}\nMeal Preference: ${selection.mealPreference || "VEG"}\nSalad Type: ${selection.planName === "Salad Plan" ? (selection.saladType || "Salad Only (Fresh Premium Salad)") : "N/A"}\nAdd-Ons: ${selection.addOns.length ? selection.addOns.join(", ") : "N/A"}`).join("\n\n");
     const message = `Hi AlphaEats, I want to request a subscription.\n\nName: ${name}\nMobile: ${mobile}\nAdditional Mobile: ${additionalMobile || "N/A"}\nEmail: ${email}\nAddress: ${address}\nAdditional Address: ${additionalAddress || "N/A"}\n\n${planSummary}`;
     const waUrl = `https://wa.me/918805051500?text=${encodeURIComponent(message)}`;
     window.open(waUrl, "_blank", "noopener,noreferrer");
@@ -498,6 +500,8 @@ export default function AlphaEatsSite() {
         timeSlot: "Both (Afternoon + Evening)",
         mealType: "Trial Meal",
         mealPreference: "VEG",
+        saladType: "Salad Only (Fresh Premium Salad)",
+        saladType: "Salad Only (Fresh Premium Salad)",
         addOns: [],
       },
     ]);
@@ -1299,6 +1303,19 @@ export default function AlphaEatsSite() {
                             </select>
                           </label>
                         </div>
+
+                        {selection.planName === "Salad Plan" && (
+                          <label className="plan-modal-field">
+                            <span>Salad Type</span>
+                            <select name="saladType" value={selection.saladType} onChange={(event) => handlePlanSelectionChange(index, event)} required>
+                              <option value="Salad Only (Fresh Premium Salad)">Salad Only (Fresh Premium Salad)</option>
+                              <option value="Lite Protein (20–30g Protein)">Lite Protein (20–30g Protein)</option>
+                              <option value="Standard Protein (40–50g Protein)">Standard Protein (40–50g Protein)</option>
+                              <option value="High Protein (60–70g Protein)">High Protein (60–70g Protein)</option>
+                              <option value="Athlete Protein (100–120g Protein)">Athlete Protein (100–120g Protein)</option>
+                            </select>
+                          </label>
+                        )}
 
                         <label className="plan-modal-field">
                           <span>Add-Ons</span>
