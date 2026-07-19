@@ -4,6 +4,7 @@ import mealPhotoTwo from "./images/DSC_2393.jpg";
 import mealPhotoThree from "./images/DSC_2369.jpg";
 import mealPhotoFour from "./images/img1.png";
 import mealPhotoFive from "./images/img2.png";
+import bottomImage from "./images/bottom_img.jpg";
 import fatLossSubscriptionImage from "./images/subscription_images/Fat_Loss_Plan.jpg";
 import powerMealSubscriptionImage from "./images/subscription_images/Power_Meal.jpg";
 import eliteSubscriptionImage from "./images/subscription_images/Elite_Plan.jpg";
@@ -420,13 +421,16 @@ export default function AlphaEatsSite() {
       : null;
     const priceValue = saladTypeSpecificPrice || plan.priceOptions?.[priceKey];
     if (!priceValue) return 0;
-    const amount = Number.parseInt(priceValue.replace(/[₹,]/g, ""), 10);
-    if (selection.mealType === "Trial Meal") return Number.isNaN(amount) ? 0 : amount;
-    const twoMealPriceValue = selection.timeSlot === "Both (Afternoon + Evening)"
+    const baseAmount = Number.parseInt(priceValue.replace(/[₹,]/g, ""), 10);
+    if (selection.mealType === "Trial Meal") return Number.isNaN(baseAmount) ? 0 : baseAmount;
+
+    const isDoubleMealSlot = selection.timeSlot === "Both (Afternoon + Evening)";
+    const twoMealPriceValue = isDoubleMealSlot
       ? (selection.mealType === "Weekly Meal" ? plan.priceOptions?.twoMealWeekly : plan.priceOptions?.twoMealMonthly)
       : null;
-    const resolvedPriceValue = twoMealPriceValue || priceValue;
-    const resolvedAmount = Number.parseInt(resolvedPriceValue.replace(/[₹,]/g, ""), 10);
+    const resolvedAmount = twoMealPriceValue
+      ? Number.parseInt(twoMealPriceValue.replace(/[₹,]/g, ""), 10)
+      : (isDoubleMealSlot ? baseAmount * 2 : baseAmount);
     return Number.isNaN(resolvedAmount) ? 0 : resolvedAmount;
   };
 
@@ -442,11 +446,17 @@ export default function AlphaEatsSite() {
     if (selection.mealType === "Trial Meal") {
       return `${priceValue}`;
     }
-    const twoMealPriceValue = selection.timeSlot === "Both (Afternoon + Evening)"
+
+    const isDoubleMealSlot = selection.timeSlot === "Both (Afternoon + Evening)";
+    const twoMealPriceValue = isDoubleMealSlot
       ? (selection.mealType === "Weekly Meal" ? plan.priceOptions?.twoMealWeekly : plan.priceOptions?.twoMealMonthly)
       : null;
-    const resolvedPriceValue = twoMealPriceValue || priceValue;
-    return resolvedPriceValue ? `${resolvedPriceValue}` : `${priceValue}`;
+    if (twoMealPriceValue) return `${twoMealPriceValue}`;
+    if (isDoubleMealSlot) {
+      const amount = Number.parseInt(priceValue.replace(/[₹,]/g, ""), 10);
+      return Number.isNaN(amount) ? `${priceValue}` : `₹${(amount * 2).toLocaleString("en-IN")}`;
+    }
+    return `${priceValue}`;
   };
 
   const checkoutAmount = planSelections.reduce((total, selection) => total + getPlanPriceForSelection(selection), 0);
@@ -1388,10 +1398,14 @@ export default function AlphaEatsSite() {
                       </div>
 
                       <div className="plan-selection-grid">
-                        <div className="plan-selection-price">
-                          <span>Selected Plan</span>
-                          <strong>{selection.planName}</strong>
-                        </div>
+                        <label className="plan-modal-field">
+                          <span>Choose Meal Plan</span>
+                          <select name="planName" value={selection.planName} onChange={(event) => handlePlanSelectionChange(index, event)} required>
+                            {PLANS.map((plan) => (
+                              <option key={plan.name} value={plan.name}>{plan.name}</option>
+                            ))}
+                          </select>
+                        </label>
 
                         <div className="plan-selection-price">
                           <span>Selected Plan Price</span>
@@ -1414,7 +1428,7 @@ export default function AlphaEatsSite() {
                             <select name="timeSlot" value={selection.timeSlot} onChange={(event) => handlePlanSelectionChange(index, event)} required>
                               <option value="Afternoon">Afternoon</option>
                               <option value="Evening">Evening</option>
-                              {selection.mealType !== "Trial Meal" && (
+                              {(selection.mealType === "Weekly Meal" || selection.mealType === "Monthly Meal") && (
                                 <option value="Both (Afternoon + Evening)">Both (Afternoon + Evening)</option>
                               )}
                             </select>
@@ -1614,7 +1628,7 @@ export default function AlphaEatsSite() {
           </Reveal>
           <Reveal delay={100}>
             <div className="contact-photo">
-              <img src={mealPhotoFive} alt="AlphaEats meal showcase" className="contact-photo-image" />
+              <img src={bottomImage} alt="AlphaEats bottom showcase" className="contact-photo-image" />
               <div className="contact-photo-quote">&ldquo;Fueling the Future of Fitness in India&rdquo;</div>
             </div>
           </Reveal>
