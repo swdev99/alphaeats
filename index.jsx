@@ -1329,23 +1329,15 @@ export default function AlphaEatsSite() {
                       </div>
 
                       <div className="plan-selection-grid">
-                        <label className="plan-modal-field">
-                          <span>Choose Meal Plan</span>
-                          <select name="planName" value={selection.planName} onChange={(event) => handlePlanSelectionChange(index, event)} required>
-                            {PLANS.map((plan) => (
-                              <option key={plan.name} value={plan.name}>{plan.name} — {plan.price}{plan.period}</option>
-                            ))}
-                          </select>
-                        </label>
+                        <div className="plan-selection-price">
+                          <span>Selected Plan</span>
+                          <strong>{selection.planName}</strong>
+                        </div>
 
-                        {selection.planName && (() => {
-                          return (
-                            <div className="plan-selection-price">
-                              <span>Selected Plan Price</span>
-                              <strong>{getPlanPriceLabel(selection)}</strong>
-                            </div>
-                          );
-                        })()}
+                        <div className="plan-selection-price">
+                          <span>Selected Plan Price</span>
+                          <strong>{getPlanPriceLabel(selection)}</strong>
+                        </div>
 
                         <div className="plan-modal-inline-row two-up">
                           <label className="plan-modal-field">
