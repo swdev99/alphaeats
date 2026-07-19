@@ -52,6 +52,11 @@ const PLANS = [
   {
     tag: "Light & Fresh", tagColor: "#C9A24B",
     name: "Salad Plan", price: "₹3,999", period: "/mo",
+    priceOptions: {
+      trial: "₹169",
+      weekly: "₹999",
+      monthly: "₹3,999",
+    },
     protein: "18–22g", calories: "280–360",
     audience: "Clean-eating lovers, light lunch plans",
     bullets: ["Leafy greens & protein bowls", "No heavy sauces", "Hydrating and refreshing meals"],
@@ -66,6 +71,11 @@ const PLANS = [
   {
     tag: "Most Popular", tagColor: "#3F7D4E",
     name: "Fat Loss Plan", price: "₹5,999", period: "/mo",
+    priceOptions: {
+      trial: "₹228",
+      weekly: "₹1,599",
+      monthly: "₹5,999",
+    },
     protein: "25–30g", calories: "350–450",
     audience: "Beginners, weight management",
     bullets: ["Low sodium, calorie-controlled", "Grilled/steamed proteins only", "Dressing packed separately"],
@@ -80,6 +90,11 @@ const PLANS = [
   {
     tag: "High Protein", tagColor: "#2F5D9A",
     name: "Power Meal", price: "₹7,710", period: "/mo",
+    priceOptions: {
+      trial: "₹279",
+      weekly: "₹1,799",
+      monthly: "₹7,710",
+    },
     protein: "40–50g", calories: "500–600",
     audience: "Busy professionals, athletes, meal replacement",
     bullets: ["Lean protein priority", "Zinc-rich ingredients", "Essential micronutrient boost"],
@@ -94,6 +109,11 @@ const PLANS = [
   {
     tag: "Premium", tagColor: "#6B3FA0",
     name: "Elite Performance", price: "₹8,970", period: "/mo",
+    priceOptions: {
+      trial: "₹299",
+      weekly: "₹2,099",
+      monthly: "₹8,970",
+    },
     protein: "60–70g", calories: "850–900",
     audience: "Serious fitness goals, body recomposition",
     bullets: ["Omega-3 sources 3x/week", "Three-compartment packing", "Premium A-grade proteins"],
@@ -108,6 +128,11 @@ const PLANS = [
   {
     tag: "High Performance", tagColor: "#B5651D",
     name: "Athletic Plan", price: "₹11,970", period: "/mo",
+    priceOptions: {
+      trial: "₹399",
+      weekly: "₹2,799",
+      monthly: "₹11,970",
+    },
     protein: "100–120g", calories: "1,100–1,300",
     audience: "Athletes training 5+ days/week, strength training",
     bullets: ["Multi-source protein blend", "Electrolyte-enhanced", "2x portion volume"],
@@ -351,14 +376,25 @@ export default function AlphaEatsSite() {
 
   const getSelectedPlanDetails = (planName) => PLANS.find((plan) => plan.name === planName) || null;
 
-  const getPlanAmount = (planName) => {
-    const plan = getSelectedPlanDetails(planName);
-    if (!plan?.price) return 0;
-    const amount = Number.parseInt(plan.price.replace(/[₹,]/g, ""), 10);
+  const getPlanPriceForSelection = (selection) => {
+    const plan = getSelectedPlanDetails(selection.planName);
+    if (!plan) return 0;
+    const priceKey = selection.mealType === "Trial Meal" ? "trial" : selection.mealType === "Weekly Meal" ? "weekly" : "monthly";
+    const priceValue = plan.priceOptions?.[priceKey];
+    if (!priceValue) return 0;
+    const amount = Number.parseInt(priceValue.replace(/[₹,]/g, ""), 10);
     return Number.isNaN(amount) ? 0 : amount;
   };
 
-  const checkoutAmount = planSelections.reduce((total, selection) => total + getPlanAmount(selection.planName), 0);
+  const getPlanPriceLabel = (selection) => {
+    const plan = getSelectedPlanDetails(selection.planName);
+    if (!plan) return "N/A";
+    const priceKey = selection.mealType === "Trial Meal" ? "trial" : selection.mealType === "Weekly Meal" ? "weekly" : "monthly";
+    const priceValue = plan.priceOptions?.[priceKey];
+    return priceValue ? `${priceValue}` : `${plan.price}${plan.period || "/mo"}`;
+  };
+
+  const checkoutAmount = planSelections.reduce((total, selection) => total + getPlanPriceForSelection(selection), 0);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -498,8 +534,7 @@ export default function AlphaEatsSite() {
     }
 
     const planSummary = planSelections.map((selection, index) => {
-      const planDetails = getSelectedPlanDetails(selection.planName);
-      const planPrice = planDetails ? `${planDetails.price}${planDetails.period || "/mo"}` : "N/A";
+      const planPrice = getPlanPriceLabel(selection);
       return `Meal Plan ${index + 1}: ${selection.planName}\nPlan Price: ${planPrice}\nStarting From: ${selection.startDate}\nTime Slot: ${selection.timeSlot}\nMeal Type: ${selection.mealType}\nMeal Preference: ${selection.mealPreference || "VEG"}\nSalad Type: ${selection.planName === "Salad Plan" ? (selection.saladType || "Salad Only (Fresh Premium Salad)") : "N/A"}\nAdd-Ons: ${selection.addOns.length ? selection.addOns.join(", ") : "N/A"}`;
     }).join("\n\n");
     const message = `Hi AlphaEats, I want to request a subscription.\n\nName: ${name}\nMobile: ${mobile}\nAdditional Mobile: ${additionalMobile || "N/A"}\nEmail: ${email}\nAddress: ${address}\nAdditional Address: ${additionalAddress || "N/A"}\n\nCheckout Amount: ₹${checkoutAmount.toLocaleString("en-IN")}\n\n${planSummary}`;
@@ -1304,11 +1339,10 @@ export default function AlphaEatsSite() {
                         </label>
 
                         {selection.planName && (() => {
-                          const selectedPlan = getSelectedPlanDetails(selection.planName);
                           return (
                             <div className="plan-selection-price">
                               <span>Selected Plan Price</span>
-                              <strong>{selectedPlan ? `${selectedPlan.price}${selectedPlan.period || "/mo"}` : "N/A"}</strong>
+                              <strong>{getPlanPriceLabel(selection)}</strong>
                             </div>
                           );
                         })()}
@@ -1394,11 +1428,10 @@ export default function AlphaEatsSite() {
                   <div className="plan-modal-summary" aria-live="polite">
                     <div className="plan-modal-summary-title">Checkout Summary</div>
                     {planSelections.map((selection, index) => {
-                      const selectedPlan = getSelectedPlanDetails(selection.planName);
                       return (
                         <div key={`${selection.planName}-${index}`} className="plan-modal-summary-item">
                           <span>Meal Plan {index + 1}: {selection.planName}</span>
-                          <strong>{selectedPlan ? `${selectedPlan.price}${selectedPlan.period || "/mo"}` : "N/A"}</strong>
+                          <strong>{getPlanPriceLabel(selection)}</strong>
                         </div>
                       );
                     })}
