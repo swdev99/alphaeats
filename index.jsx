@@ -4,6 +4,11 @@ import mealPhotoTwo from "./images/DSC_2393.jpg";
 import mealPhotoThree from "./images/DSC_2369.jpg";
 import mealPhotoFour from "./images/img1.png";
 import mealPhotoFive from "./images/img2.png";
+import fatLossSubscriptionImage from "./images/subscription_images/Fat_Loss_Plan.jpg";
+import powerMealSubscriptionImage from "./images/subscription_images/Power_Meal.jpg";
+import eliteSubscriptionImage from "./images/subscription_images/Elite_Plan.jpg";
+import athleticSubscriptionImage from "./images/subscription_images/Athletic_Plan.jpg";
+import saladSubscriptionImage from "./images/subscription_images/salads.jpg";
 
 /* ------------------------------------------------------------------
    AlphaEats — brand tokens (lifted from the reference mark)
@@ -50,6 +55,7 @@ const PLANS = [
     protein: "25–30g", calories: "350–450",
     audience: "Beginners, weight management",
     bullets: ["Low sodium, calorie-controlled", "Grilled/steamed proteins only", "Dressing packed separately"],
+    image: fatLossSubscriptionImage,
     details: {
       mealStyle: "Balanced calorie deficit meals",
       timing: "1 meal/day or 2 meals/day based on your goals",
@@ -63,6 +69,7 @@ const PLANS = [
     protein: "40–50g", calories: "500–600",
     audience: "Busy professionals, athletes, meal replacement",
     bullets: ["Lean protein priority", "Zinc-rich ingredients", "Essential micronutrient boost"],
+    image: powerMealSubscriptionImage,
     details: {
       mealStyle: "Protein-forward, satiating meal portions",
       timing: "Prepared fresh for daily delivery with portion consistency",
@@ -76,6 +83,7 @@ const PLANS = [
     protein: "60–70g", calories: "850–900",
     audience: "Serious fitness goals, body recomposition",
     bullets: ["Omega-3 sources 3x/week", "Three-compartment packing", "Premium A-grade proteins"],
+    image: eliteSubscriptionImage,
     details: {
       mealStyle: "Premium recovery-focused macro control",
       timing: "Ideal for multi-meal performance routines and recovery windows",
@@ -89,6 +97,7 @@ const PLANS = [
     protein: "100–120g", calories: "1,100–1,300",
     audience: "Athletes training 5+ days/week, strength training",
     bullets: ["Multi-source protein blend", "Electrolyte-enhanced", "2x portion volume"],
+    image: athleticSubscriptionImage,
     details: {
       mealStyle: "High-volume, high-performance fuel strategy",
       timing: "Built for heavy training days and endurance output",
@@ -102,6 +111,7 @@ const PLANS = [
     protein: "18–22g", calories: "280–360",
     audience: "Clean-eating lovers, light lunch plans",
     bullets: ["Leafy greens & protein bowls", "No heavy sauces", "Hydrating and refreshing meals"],
+    image: saladSubscriptionImage,
     details: {
       mealStyle: "Fresh salad-forward lunch meals",
       timing: "Best for midday delivery with light, high-fiber portions",
@@ -632,6 +642,8 @@ export default function AlphaEatsSite() {
         .plan-modal-body { padding: 22px; overflow-y: auto; }
         .plan-modal-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; }
         .plan-modal-text { font-size: 0.95rem; color: #4B5563; line-height: 1.65; margin-bottom: 14px; }
+        .plan-modal-hero { display: grid; grid-template-columns: 130px 1fr; gap: 14px; align-items: center; margin-bottom: 16px; }
+        .plan-modal-hero img { width: 100%; height: 110px; object-fit: cover; display: block; border: 1px solid #E6DED0; }
         .plan-modal-list { margin: 0; padding-left: 18px; color: #374151; }
         .plan-modal-list li { margin-bottom: 8px; }
         .plan-modal-actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
@@ -941,8 +953,11 @@ export default function AlphaEatsSite() {
                 </div>
               </div>
               <div className="plan-modal-body">
-                <div className="plan-modal-text">
-                  {selectedPlanData.audience}. Designed to deliver consistent nutrition with macro-aware portioning and premium food quality.
+                <div className="plan-modal-hero">
+                  <img src={selectedPlanData.image} alt={`${selectedPlanData.name} preview`} />
+                  <div className="plan-modal-text">
+                    {selectedPlanData.audience}. Designed to deliver consistent nutrition with macro-aware portioning and premium food quality.
+                  </div>
                 </div>
                 <ul className="plan-modal-list">
                   <li><strong>Meal style:</strong> {selectedPlanData.details.mealStyle}</li>
