@@ -96,6 +96,19 @@ const PLANS = [
       delivery: "Higher-volume dispatch setup with routine tracking and repeat delivery support",
     },
   },
+  {
+    tag: "Light & Fresh", tagColor: "#C9A24B",
+    name: "Salad Plan", price: "₹5,999", period: "/mo",
+    protein: "18–22g", calories: "280–360",
+    audience: "Clean-eating lovers, light lunch plans",
+    bullets: ["Leafy greens & protein bowls", "No heavy sauces", "Hydrating and refreshing meals"],
+    details: {
+      mealStyle: "Fresh salad-forward lunch meals",
+      timing: "Best for midday delivery with light, high-fiber portions",
+      bestFor: "Members looking for a clean, low-calorie, high-hydration menu",
+      delivery: "Freshly packed dispatch with chilled-carry support",
+    },
+  },
 ];
 
 const STEPS = [
@@ -167,6 +180,19 @@ const ROADMAP = [
   },
 ];
 
+const ADD_ONS = [
+  "Pineapple Healthy Smoothie",
+  "Dragon Fruit Healthy Smoothie",
+  "Apple Healthy Smoothie",
+  "Papaya Healthy Smoothie",
+  "Orange Healthy Smoothie",
+  "Mixed Fruit Healthy Smoothie",
+  "Vegetable Detox Smoothie",
+  "Pomegranate Healthy Smoothie",
+  "Kiwi Healthy Smoothie",
+  "Avocado Healthy Smoothie",
+].map((item) => ({ label: item, value: `${item} (350 ML)` }));
+
 const CONTACT = {
   site: "alphaeatss.com",
   phone: "+91 88050 51500",
@@ -184,25 +210,25 @@ const HOME_SLIDES = [
   {
     image: mealPhotoTwo,
     eyebrow: "Chef-Quality Meals",
-    title: "Meals Built for Results",
+    title: "Meals Built for\nResults",
     copy: "From fat loss to athletic performance, every plan is crafted to support performance and recovery.",
   },
   {
     image: mealPhotoThree,
     eyebrow: "Daily Doorstep Delivery",
-    title: "Your Nutrition Routine, Simplified",
+    title: "Your Nutrition Routine,\nSimplified",
     copy: "A full-screen branded experience that turns daily meal delivery into a premium health ritual.",
   },
   {
     image: mealPhotoFour,
     eyebrow: "Premium Presentation",
-    title: "Beautifully Packed. Perfectly Prepared.",
+    title: "Prepared to Perfection",
     copy: "Every delivery is positioned as a premium wellness ritual with clean presentation and consistent quality.",
   },
   {
     image: mealPhotoFive,
     eyebrow: "Consistency at Scale",
-    title: "Branded Nutrition for Busy Lives",
+    title: "Branded Nutrition for\nBusy Lives",
     copy: "From busy professionals to serious athletes, AlphaEats removes the daily friction of staying on-plan.",
   },
 ];
@@ -298,6 +324,7 @@ export default function AlphaEatsSite() {
     address: "",
     additionalAddress: "",
     mealType: "Trial Meal",
+    addOns: [],
   });
 
   useEffect(() => {
@@ -316,6 +343,17 @@ export default function AlphaEatsSite() {
     setSubscriptionForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleAddOnToggle = (value) => {
+    setFormError("");
+    setSubscriptionForm((prev) => {
+      const exists = prev.addOns.includes(value);
+      return {
+        ...prev,
+        addOns: exists ? prev.addOns.filter((item) => item !== value) : [...prev.addOns, value],
+      };
+    });
+  };
+
   const handleSubscriptionSubmit = (event) => {
     event.preventDefault();
 
@@ -326,6 +364,7 @@ export default function AlphaEatsSite() {
     const address = subscriptionForm.address.trim();
     const additionalAddress = subscriptionForm.additionalAddress.trim();
     const mealType = subscriptionForm.mealType;
+    const addOns = subscriptionForm.addOns;
 
     if (name.length < 2) {
       setFormError("Please enter a valid name.");
@@ -357,7 +396,7 @@ export default function AlphaEatsSite() {
       return;
     }
 
-    const message = `Hi AlphaEats, I want to request a subscription.\n\nPlan: ${selectedPlanData.name}\nName: ${name}\nMobile: ${mobile}\nAdditional Mobile: ${additionalMobile || "N/A"}\nEmail: ${email}\nAddress: ${address}\nAdditional Address: ${additionalAddress || "N/A"}\nMeal Type: ${mealType}`;
+    const message = `Hi AlphaEats, I want to request a subscription.\n\nPlan: ${selectedPlanData.name}\nName: ${name}\nMobile: ${mobile}\nAdditional Mobile: ${additionalMobile || "N/A"}\nEmail: ${email}\nAddress: ${address}\nAdditional Address: ${additionalAddress || "N/A"}\nMeal Type: ${mealType}\nAdd-Ons: ${addOns.length ? addOns.join(", ") : "N/A"}`;
     const waUrl = `https://wa.me/918805051500?text=${encodeURIComponent(message)}`;
     window.open(waUrl, "_blank", "noopener,noreferrer");
     setSelectedPlan(null);
@@ -372,6 +411,7 @@ export default function AlphaEatsSite() {
       address: "",
       additionalAddress: "",
       mealType: "Trial Meal",
+      addOns: [],
     });
   };
 
@@ -431,6 +471,7 @@ export default function AlphaEatsSite() {
         .hero {
           position: relative;
           min-height: 100vh;
+          height: 100vh;
           overflow: hidden;
           display: grid;
           align-items: center;
@@ -438,9 +479,11 @@ export default function AlphaEatsSite() {
         .hero-slide {
           position: absolute;
           inset: 0;
+          z-index: 0;
           opacity: 0;
           transform: scale(1.08);
           transition: opacity 1.2s ease, transform 6s ease;
+          pointer-events: none;
         }
         .hero-slide.active {
           opacity: 1;
@@ -450,16 +493,18 @@ export default function AlphaEatsSite() {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          object-position: center;
           display: block;
           filter: saturate(0.95) contrast(1.04) brightness(0.68);
         }
         .hero-overlay {
           position: absolute;
           inset: 0;
+          z-index: 1;
+          pointer-events: none;
           background:
             linear-gradient(90deg, rgba(19,27,39,0.88) 0%, rgba(19,27,39,0.55) 42%, rgba(19,27,39,0.72) 100%),
             radial-gradient(circle at top left, rgba(201,162,75,0.25), transparent 40%);
-          z-index: 1;
         }
         .hero-content {
           position: relative;
@@ -471,11 +516,17 @@ export default function AlphaEatsSite() {
           justify-content: center;
         }
         .hero-rule { display: none; }
+        .hero-title {
+          max-width: 600px;
+          min-height: 8.2rem;
+          white-space: pre-line;
+        }
         .hero-quote {
           font-style: italic; color: var(--bone);
           font-size: 1.22rem; max-width: 680px;
           border-left: 2px solid var(--gold);
           padding-left: 16px; line-height: 1.78;
+          margin-bottom: 0;
         }
         .hero-cta-row {
           display: flex; gap: 14px; flex-wrap: wrap; margin-top: 28px;
@@ -574,11 +625,11 @@ export default function AlphaEatsSite() {
           display: flex; align-items: center; justify-content: center; padding: 24px;
         }
         .plan-modal {
-          width: min(560px, 100%); background: #fff; border: 1px solid #E6DED0;
-          box-shadow: 0 24px 70px rgba(0,0,0,0.28); color: var(--ink);
+          width: min(560px, 100%); max-height: min(90vh, 760px); background: #fff; border: 1px solid #E6DED0;
+          box-shadow: 0 24px 70px rgba(0,0,0,0.28); color: var(--ink); display: flex; flex-direction: column;
         }
         .plan-modal-head { padding: 18px 22px; color: #fff; }
-        .plan-modal-body { padding: 22px; }
+        .plan-modal-body { padding: 22px; overflow-y: auto; }
         .plan-modal-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; }
         .plan-modal-text { font-size: 0.95rem; color: #4B5563; line-height: 1.65; margin-bottom: 14px; }
         .plan-modal-list { margin: 0; padding-left: 18px; color: #374151; }
@@ -592,6 +643,21 @@ export default function AlphaEatsSite() {
           width: 100%; padding: 12px 14px; border: 1px solid #D6D0C5; background: #fff; color: var(--ink);
           font-size: 0.96rem; box-sizing: border-box;
         }
+        .plan-modal-addon-grid {
+          display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x proximity;
+        }
+        .plan-modal-addon-card {
+          border: 1px solid #D6D0C5; background: #fff; color: var(--ink); padding: 12px 10px; text-align: left;
+          cursor: pointer; transition: all .2s ease; min-width: 180px; flex: 0 0 180px; scroll-snap-align: start;
+        }
+        .plan-modal-addon-card:hover {
+          border-color: var(--gold); transform: translateY(-1px);
+        }
+        .plan-modal-addon-card.selected {
+          border-color: var(--gold); background: rgba(201,162,75,0.12);
+        }
+        .plan-modal-addon-name { font-size: 0.86rem; font-weight: 700; margin-bottom: 4px; }
+        .plan-modal-addon-size { font-size: 0.74rem; color: #5B6472; }
         .plan-modal-field input:focus,
         .plan-modal-field select:focus { outline: 2px solid rgba(201,162,75,0.28); border-color: var(--gold); }
         .plan-modal-inline-row {
@@ -722,6 +788,12 @@ export default function AlphaEatsSite() {
           <a href="#zones">Coverage</a>
           <a href="#contact">Contact</a>
         </div>
+        <button
+          className="nav-cta"
+          onClick={() => document.getElementById("plans")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+        >
+          Start a Plan
+        </button>
       </nav>
 
       {/* HERO */}
@@ -739,14 +811,10 @@ export default function AlphaEatsSite() {
             <span className="eyebrow-rule" />
             {activeSlideData.eyebrow}
           </div>
-          <h1 className="section-title display" style={{ maxWidth: 680, fontSize: 'clamp(2.5rem, 5vw, 4.6rem)', lineHeight: 1.06, margin: '0 0 14px' }}>
+          <h1 className="section-title display hero-title" style={{ maxWidth: 600, fontSize: 'clamp(2.2rem, 4.8vw, 4.2rem)', lineHeight: 1.08, margin: '0 0 14px' }}>
             {activeSlideData.title}
           </h1>
           <p className="hero-quote">{activeSlideData.copy}</p>
-          <div className="hero-cta-row">
-            <a className="hero-cta primary" href="#plans">Start a Plan</a>
-            <a className="hero-cta secondary" href="#about">See More</a>
-          </div>
           <div className="hero-pagination">
             {HOME_SLIDES.map((slide, index) => (
               <button
@@ -836,7 +904,7 @@ export default function AlphaEatsSite() {
         <Reveal>
           <div className="section-head">
             <SectionLabel>Meal Plan Catalogue</SectionLabel>
-            <h2 className="section-title">4 Plans. Every Fitness Goal Covered.</h2>
+            <h2 className="section-title">5 Plans. Every Fitness Goal Covered.</h2>
           </div>
         </Reveal>
         <div className="plan-grid-4">
@@ -1003,6 +1071,27 @@ export default function AlphaEatsSite() {
                       <option value="Weekly Meal">Weekly Meal</option>
                       <option value="Monthly Meal">Monthly Meal</option>
                     </select>
+                  </label>
+
+                  <label className="plan-modal-field">
+                    <span>Add-Ons</span>
+                    <div className="plan-modal-addon-grid">
+                      {ADD_ONS.map((addon) => {
+                        const selected = subscriptionForm.addOns.includes(addon.value);
+                        return (
+                          <button
+                            key={addon.value}
+                            type="button"
+                            className={`plan-modal-addon-card ${selected ? "selected" : ""}`}
+                            aria-pressed={selected}
+                            onClick={() => handleAddOnToggle(addon.value)}
+                          >
+                            <div className="plan-modal-addon-name">{addon.label}</div>
+                            <div className="plan-modal-addon-size">350 ML</div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </label>
 
                   {formError && <p className="plan-modal-error">{formError}</p>}
