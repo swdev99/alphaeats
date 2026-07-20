@@ -637,46 +637,108 @@ export default function AlphaEatsSite() {
       return `Meal Plan ${index + 1}: ${selection.planName}\nPlan Price: ${planPrice}\nStarting From: ${selection.startDate}\nTime Slot: ${selection.timeSlot}\nMeal Type: ${selection.mealType}\nMeal Preference: ${selection.mealPreference || "VEG"}\nSalad Type: ${selection.planName === "Salad Plan" ? (selection.saladType || "Salad Only (Fresh Premium Salad)") : "N/A"}\nAdd-Ons: ${addOnDetails}`;
     }).join("\n\n");
 
-    const pdf = new jsPDF();
-    pdf.setFontSize(16);
-    pdf.text("AlphaEats Subscription Request", 14, 20);
-    pdf.setFontSize(11);
-    let cursorY = 38;
-    const addText = (text) => {
-      const lines = pdf.splitTextToSize(text, 180);
-      lines.forEach((line) => {
-        pdf.text(line, 14, cursorY);
-        cursorY += 14;
-      });
+    const pdf = new jsPDF({ unit: "pt", format: "a4" });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const margin = 40;
+    pdf.setFillColor("#131B27");
+    pdf.rect(0, 0, pageWidth, 80, "F");
+    pdf.setFontSize(22);
+    pdf.setTextColor("#FFFFFF");
+    pdf.text("ALPHAEATS", margin, 46);
+    pdf.setFontSize(10);
+    pdf.setTextColor("#F3F1EA");
+    pdf.text("Request Subscription PDF", margin, 62);
+    pdf.setDrawColor("#C9A24B");
+    pdf.setLineWidth(2);
+    pdf.line(margin, 84, pageWidth - margin, 84);
+
+    pdf.setTextColor("#131B27");
+    pdf.setFontSize(12);
+    let cursorY = 110;
+    const addText = (label, value) => {
+      pdf.setFont("helvetica", "bold");
+      pdf.text(`${label}:`, margin, cursorY);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(`${value}`, margin + 120, cursorY);
+      cursorY += 18;
     };
-    addText(`Name: ${name}`);
-    addText(`Mobile: ${mobile}`);
-    addText(`Additional Mobile: ${additionalMobile || "N/A"}`);
-    addText(`Email: ${email}`);
-    addText(`Address: ${address}`);
-    addText(`Additional Address: ${additionalAddress || "N/A"}`);
-    addText(`Checkout Amount: ₹${checkoutAmount.toLocaleString("en-IN")}`);
-    addText("");
+    addText("Name", name);
+    addText("Mobile", mobile);
+    addText("Additional Mobile", additionalMobile || "N/A");
+    addText("Email", email);
+    addText("Address", address);
+    addText("Additional Address", additionalAddress || "N/A");
+    addText("Checkout Amount", `₹${checkoutAmount.toLocaleString("en-IN")}`);
+    cursorY += 10;
+
+    const renderTableRow = (row, y, isHeader = false) => {
+      const xPositions = [margin, margin + 160, margin + 340, margin + 460, margin + 540];
+      row.forEach((cell, index) => {
+        pdf.text(String(cell), xPositions[index], y);
+      });
+      if (isHeader) {
+        pdf.setLineWidth(0.5);
+        pdf.line(margin, y + 6, pageWidth - margin, y + 6);
+      }
+    };
+
+    if (cursorY > 700) {
+      pdf.addPage();
+      cursorY = 40;
+    }
+
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Subscription Summary", margin, cursorY);
+    cursorY += 18;
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "bold");
+    renderTableRow(["Plan", "Start", "Slot", "Type", "Price"], cursorY, true);
+    cursorY += 16;
+    pdf.setFont("helvetica", "normal");
+
     planSelections.forEach((selection, index) => {
-      addText(`Meal Plan ${index + 1}: ${selection.planName}`);
-      addText(`  Plan Price: ${getPlanPriceLabel(selection)}`);
-      addText(`  Starting From: ${selection.startDate}`);
-      addText(`  Time Slot: ${selection.timeSlot}`);
-      addText(`  Meal Type: ${selection.mealType}`);
-      addText(`  Meal Preference: ${selection.mealPreference || "VEG"}`);
-      addText(`  Salad Type: ${selection.planName === "Salad Plan" ? (selection.saladType || "Salad Only (Fresh Premium Salad)") : "N/A"}`);
+      if (cursorY > 740) {
+        pdf.addPage();
+        cursorY = 40;
+      }
+      renderTableRow([
+        selection.planName,
+        selection.startDate || "-",
+        selection.timeSlot,
+        selection.mealType,
+        getPlanPriceLabel(selection),
+      ], cursorY);
+      cursorY += 16;
       if (selection.addOns.length) {
         selection.addOns.forEach((addon) => {
-          addText(`  Add-On: ${addon.value} x ${addon.quantity} = ₹${(addon.quantity * ADD_ON_PRICE).toLocaleString("en-IN")}`);
+          renderTableRow([
+            `  • ${addon.value}`,
+            "",
+            "",
+            `Qty ${addon.quantity}`,
+            `₹${(addon.quantity * ADD_ON_PRICE).toLocaleString("en-IN")}`,
+          ], cursorY);
+          cursorY += 14;
         });
-      } else {
-        addText("  Add-Ons: N/A");
       }
-      addText("");
+      cursorY += 6;
     });
-    pdf.save(`AlphaEats-Subscription-${name.replace(/\s+/g, "_") || "request"}.pdf`);
 
-    const message = `Hi AlphaEats, I have generated a subscription request PDF with all details. Please attach the downloaded PDF in the WhatsApp conversation.`;
+    if (cursorY > 740) {
+      pdf.addPage();
+      cursorY = 40;
+    }
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor("#C9A24B");
+    pdf.text("TOTAL", margin + 420, cursorY);
+    pdf.text(`₹${checkoutAmount.toLocaleString("en-IN")}`, pageWidth - margin - 10, cursorY, { align: "right" });
+
+    const pdfBlob = pdf.output("blob");
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    window.open(pdfUrl, "_blank", "noopener,noreferrer");
+
+    const message = `Hi AlphaEats, I have generated a subscription request PDF with all details. Please attach it in this WhatsApp chat.`;
     const waUrl = `https://wa.me/918805051500?text=${encodeURIComponent(message)}`;
     window.open(waUrl, "_blank", "noopener,noreferrer");
     setSelectedPlan(null);
@@ -1639,7 +1701,7 @@ export default function AlphaEatsSite() {
                   {formError && <p className="plan-modal-error">{formError}</p>}
 
                   <div className="plan-modal-actions">
-                    <button type="submit" className="plan-modal-request">Generate PDF & WhatsApp</button>
+                    <button type="submit" className="plan-modal-request">Request Subscription</button>
                     <button type="button" className="plan-modal-close" onClick={() => {
                       setSelectedPlan(null);
                       setShowAdditionalMobile(false);
