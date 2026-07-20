@@ -660,7 +660,7 @@ export default function AlphaEatsSite() {
     let cursorY = 132;
     const rupee = String.fromCharCode(8377);
     const normalizeAmount = (value) => {
-      const digits = String(value).replace(/[^ -\d,]/g, "").trim();
+      const digits = String(value).replace(/[^0-9,]/g, "").trim();
       return digits ? `${rupee}${digits}` : "-";
     };
     const ensureSpace = (space) => {
@@ -701,7 +701,6 @@ export default function AlphaEatsSite() {
     addField("Email", email);
     addField("Address", address);
     addField("Additional Address", additionalAddress || "N/A");
-    addField("Checkout Amount", normalizeAmount(checkoutAmount.toLocaleString("en-IN")));
 
     addSectionHeader("Subscription Summary");
     planSelections.forEach((selection, index) => {
