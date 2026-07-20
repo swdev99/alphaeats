@@ -639,106 +639,103 @@ export default function AlphaEatsSite() {
 
     const pdf = new jsPDF({ unit: "pt", format: "a4" });
     const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
     const margin = 40;
+    const contentWidth = pageWidth - margin * 2;
+
     pdf.setFillColor("#131B27");
-    pdf.rect(0, 0, pageWidth, 80, "F");
+    pdf.rect(0, 0, pageWidth, 110, "F");
+    pdf.addImage(LOGO_ICON, "PNG", margin, 20, 56, 56);
+    pdf.setFont("helvetica", "bold");
     pdf.setFontSize(22);
-    pdf.setTextColor("#FFFFFF");
-    pdf.text("ALPHAEATS", margin, 46);
-    pdf.setFontSize(10);
     pdf.setTextColor("#F3F1EA");
-    pdf.text("Request Subscription PDF", margin, 62);
+    pdf.text("ALPHAEATS", margin + 72, 46);
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(10);
+    pdf.text("Subscription Request", margin + 72, 64);
     pdf.setDrawColor("#C9A24B");
     pdf.setLineWidth(2);
-    pdf.line(margin, 84, pageWidth - margin, 84);
+    pdf.line(margin, 110, pageWidth - margin, 110);
 
-    pdf.setTextColor("#131B27");
-    pdf.setFontSize(12);
-    let cursorY = 110;
-    const addText = (label, value) => {
-      pdf.setFont("helvetica", "bold");
-      pdf.text(`${label}:`, margin, cursorY);
-      pdf.setFont("helvetica", "normal");
-      pdf.text(`${value}`, margin + 120, cursorY);
-      cursorY += 18;
-    };
-    addText("Name", name);
-    addText("Mobile", mobile);
-    addText("Additional Mobile", additionalMobile || "N/A");
-    addText("Email", email);
-    addText("Address", address);
-    addText("Additional Address", additionalAddress || "N/A");
-    addText("Checkout Amount", `₹${checkoutAmount.toLocaleString("en-IN")}`);
-    cursorY += 10;
-
-    const renderTableRow = (row, y, isHeader = false) => {
-      const xPositions = [margin, margin + 160, margin + 340, margin + 460, margin + 540];
-      row.forEach((cell, index) => {
-        pdf.text(String(cell), xPositions[index], y);
-      });
-      if (isHeader) {
-        pdf.setLineWidth(0.5);
-        pdf.line(margin, y + 6, pageWidth - margin, y + 6);
-      }
-    };
-
-    if (cursorY > 700) {
-      pdf.addPage();
-      cursorY = 40;
-    }
-
-    pdf.setFontSize(12);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("Subscription Summary", margin, cursorY);
-    cursorY += 18;
-    pdf.setFontSize(10);
-    pdf.setFont("helvetica", "bold");
-    renderTableRow(["Plan", "Start", "Slot", "Type", "Price"], cursorY, true);
-    cursorY += 16;
-    pdf.setFont("helvetica", "normal");
-
-    planSelections.forEach((selection, index) => {
-      if (cursorY > 740) {
+    let cursorY = 132;
+    const ensureSpace = (space) => {
+      if (cursorY + space > pageHeight - margin) {
         pdf.addPage();
-        cursorY = 40;
+        cursorY = margin;
       }
-      renderTableRow([
-        selection.planName,
-        selection.startDate || "-",
-        selection.timeSlot,
-        selection.mealType,
-        getPlanPriceLabel(selection),
-      ], cursorY);
-      cursorY += 16;
+    };
+
+    const addSectionHeader = (title) => {
+      ensureSpace(42);
+      pdf.setFillColor("#F3F1EA");
+      pdf.setTextColor("#131B27");
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(12);
+      pdf.rect(margin, cursorY - 14, contentWidth, 24, "F");
+      pdf.text(title, margin + 10, cursorY + 4);
+      cursorY += 36;
+    };
+
+    const addField = (label, value) => {
+      ensureSpace(30);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(10);
+      pdf.setTextColor("#131B27");
+      pdf.text(`${label}`, margin, cursorY);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(10);
+      const wrapped = pdf.splitTextToSize(value || "-", contentWidth);
+      pdf.text(wrapped, margin, cursorY + 14);
+      cursorY += wrapped.length * 14 + 16;
+    };
+
+    addSectionHeader("Customer Information");
+    addField("Name", name);
+    addField("Mobile", mobile);
+    addField("Additional Mobile", additionalMobile || "N/A");
+    addField("Email", email);
+    addField("Address", address);
+    addField("Additional Address", additionalAddress || "N/A");
+    addField("Checkout Amount", `₹${checkoutAmount.toLocaleString("en-IN")}`);
+
+    addSectionHeader("Subscription Summary");
+    planSelections.forEach((selection, index) => {
+      ensureSpace(100);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(11);
+      pdf.setTextColor("#131B27");
+      pdf.text(`Plan ${index + 1}: ${selection.planName}`, margin, cursorY);
+      cursorY += 18;
+      addField("Start Date", selection.startDate || "Pending");
+      addField("Time Slot", selection.timeSlot);
+      addField("Meal Type", selection.mealType);
+      addField("Meal Preference", selection.mealPreference || "VEG");
+      addField("Salad Type", selection.planName === "Salad Plan" ? (selection.saladType || "Salad Only (Fresh Premium Salad)") : "N/A");
+      addField("Plan Price", getPlanPriceLabel(selection));
       if (selection.addOns.length) {
-        selection.addOns.forEach((addon) => {
-          renderTableRow([
-            `  • ${addon.value}`,
-            "",
-            "",
-            `Qty ${addon.quantity}`,
-            `₹${(addon.quantity * ADD_ON_PRICE).toLocaleString("en-IN")}`,
-          ], cursorY);
-          cursorY += 14;
-        });
+        const addonLines = selection.addOns.map((addon) => `• ${addon.value} x ${addon.quantity} = ₹${(addon.quantity * ADD_ON_PRICE).toLocaleString("en-IN")}`);
+        addField("Add-Ons", addonLines.join("\n"));
+      } else {
+        addField("Add-Ons", "N/A");
       }
-      cursorY += 6;
+      cursorY += 10;
     });
 
-    if (cursorY > 740) {
-      pdf.addPage();
-      cursorY = 40;
-    }
+    ensureSpace(60);
+    pdf.setFillColor("#C9A24B");
+    pdf.setDrawColor("#C9A24B");
+    pdf.setTextColor("#131B27");
     pdf.setFont("helvetica", "bold");
-    pdf.setTextColor("#C9A24B");
-    pdf.text("TOTAL", margin + 420, cursorY);
-    pdf.text(`₹${checkoutAmount.toLocaleString("en-IN")}`, pageWidth - margin - 10, cursorY, { align: "right" });
+    pdf.setFontSize(12);
+    pdf.rect(margin, cursorY - 6, contentWidth, 36, "F");
+    pdf.text("Final Checkout Amount", margin + 10, cursorY + 18);
+    pdf.text(`₹${checkoutAmount.toLocaleString("en-IN")}`, pageWidth - margin - 10, cursorY + 18, { align: "right" });
 
     const pdfBlob = pdf.output("blob");
     const pdfUrl = URL.createObjectURL(pdfBlob);
     window.open(pdfUrl, "_blank", "noopener,noreferrer");
 
-    const message = `Hi AlphaEats, I have generated a subscription request PDF with all details. Please attach it in this WhatsApp chat.`;
+    const message = `Hi AlphaEats, the request details are ready for review. Please attach the open document in this WhatsApp chat.`;
     const waUrl = `https://wa.me/918805051500?text=${encodeURIComponent(message)}`;
     window.open(waUrl, "_blank", "noopener,noreferrer");
     setSelectedPlan(null);
