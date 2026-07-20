@@ -694,6 +694,142 @@ export default function AlphaEatsSite() {
       cursorY += wrapped.length * 14 + 16;
     };
 
+    const createPreviewImage = () => {
+      const width = 840;
+      const height = 1188;
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = "#131B27";
+      ctx.fillRect(0, 0, width, 120);
+      ctx.fillStyle = "#F3F1EA";
+      ctx.font = "bold 28px Arial";
+      ctx.fillText("ALPHAEATS", 60, 50);
+      ctx.font = "normal 12px Arial";
+      ctx.fillText("Fueling the Future of Fitness in India", 60, 75);
+      ctx.strokeStyle = "#C9A24B";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(40, 110);
+      ctx.lineTo(width - 40, 110);
+      ctx.stroke();
+
+      let y = 140;
+      const lineHeight = 18;
+      const wrapText = (text, x, maxWidth) => {
+        const words = text.split(" ");
+        let line = "";
+        for (const word of words) {
+          const testLine = line + word + " ";
+          const metrics = ctx.measureText(testLine);
+          if (metrics.width > maxWidth && line) {
+            ctx.fillText(line.trim(), x, y);
+            y += lineHeight;
+            line = `${word} `;
+          } else {
+            line = testLine;
+          }
+        }
+        if (line) {
+          ctx.fillText(line.trim(), x, y);
+          y += lineHeight;
+        }
+      };
+
+      ctx.fillStyle = "#131B27";
+      ctx.font = "bold 12px Arial";
+      ctx.fillText("Customer Information", 40, y);
+      y += 26;
+      const drawField = (label, value) => {
+        ctx.font = "bold 10px Arial";
+        ctx.fillText(`${label}:`, 40, y);
+        ctx.font = "normal 10px Arial";
+        wrapText(value || "-", 180, width - 220);
+        y += 8;
+      };
+
+      drawField("Name", name);
+      drawField("Mobile", mobile);
+      drawField("Additional Mobile", additionalMobile || "N/A");
+      drawField("Email", email);
+      drawField("Address", address);
+      drawField("Additional Address", additionalAddress || "N/A");
+
+      y += 16;
+      ctx.font = "bold 12px Arial";
+      ctx.fillText("Subscription Summary", 40, y);
+      y += 26;
+      planSelections.forEach((selection, index) => {
+        ctx.font = "bold 11px Arial";
+        ctx.fillText(`Plan ${index + 1}: ${selection.planName}`, 40, y);
+        y += 20;
+        ctx.font = "bold 10px Arial";
+        ctx.fillText("Start Date:", 40, y);
+        ctx.font = "normal 10px Arial";
+        ctx.fillText(selection.startDate || "Pending", 140, y);
+        y += lineHeight;
+        ctx.font = "bold 10px Arial";
+        ctx.fillText("Time Slot:", 40, y);
+        ctx.font = "normal 10px Arial";
+        wrapText(selection.timeSlot, 140, width - 220);
+        y += lineHeight;
+        ctx.font = "bold 10px Arial";
+        ctx.fillText("Meal Type:", 40, y);
+        ctx.font = "normal 10px Arial";
+        ctx.fillText(selection.mealType, 140, y);
+        y += lineHeight;
+        ctx.font = "bold 10px Arial";
+        ctx.fillText("Meal Preference:", 40, y);
+        ctx.font = "normal 10px Arial";
+        ctx.fillText(selection.mealPreference || "VEG", 140, y);
+        y += lineHeight;
+        if (selection.planName === "Salad Plan") {
+          ctx.font = "bold 10px Arial";
+          ctx.fillText("Salad Type:", 40, y);
+          ctx.font = "normal 10px Arial";
+          wrapText(selection.saladType || "Salad Only (Fresh Premium Salad)", 140, width - 220);
+          y += lineHeight;
+        }
+        ctx.font = "bold 10px Arial";
+        ctx.fillText("Plan Price:", 40, y);
+        ctx.font = "normal 10px Arial";
+        ctx.fillText(normalizeAmount(getPlanPriceLabel(selection).replace(/^[^\d]*([\d,]+).*$/, "$1")), 140, y);
+        y += lineHeight;
+        if (selection.addOns.length) {
+          ctx.font = "bold 10px Arial";
+          ctx.fillText("Add-Ons:", 40, y);
+          y += lineHeight;
+          selection.addOns.forEach((addon) => {
+            ctx.font = "normal 10px Arial";
+            wrapText(`• ${addon.value} x ${addon.quantity} = ${normalizeAmount((addon.quantity * ADD_ON_PRICE).toLocaleString("en-IN"))}`, 60, width - 100);
+            y += 4;
+          });
+        } else {
+          ctx.font = "bold 10px Arial";
+          ctx.fillText("Add-Ons:", 40, y);
+          ctx.font = "normal 10px Arial";
+          ctx.fillText("N/A", 140, y);
+          y += lineHeight;
+        }
+        y += 10;
+      });
+
+      ctx.fillStyle = "#C9A24B";
+      ctx.fillRect(40, y, width - 80, 42);
+      ctx.fillStyle = "#131B27";
+      ctx.font = "bold 12px Arial";
+      ctx.fillText("Final Checkout Amount", 50, y + 26);
+      ctx.textAlign = "right";
+      ctx.fillText(normalizeAmount(checkoutAmount.toLocaleString("en-IN")), width - 50, y + 26);
+      ctx.textAlign = "start";
+
+      return canvas.toDataURL("image/png");
+    };
+
     addSectionHeader("Customer Information");
     addField("Name", name);
     addField("Mobile", mobile);
@@ -743,7 +879,12 @@ export default function AlphaEatsSite() {
     const pdfUrl = URL.createObjectURL(pdfBlob);
     window.open(pdfUrl, "_blank", "noopener,noreferrer");
 
-    const message = `Hi AlphaEats, the request details are ready for review. Please attach the open document in this WhatsApp chat.`;
+    const imageUrl = createPreviewImage();
+    if (imageUrl) {
+      window.open(imageUrl, "_blank", "noopener,noreferrer");
+    }
+
+    const message = `Hi AlphaEats, the request details are ready for review. Please save the open image or attach the PDF in WhatsApp.`;
     const waUrl = `https://wa.me/918805051500?text=${encodeURIComponent(message)}`;
     window.open(waUrl, "_blank", "noopener,noreferrer");
     setSelectedPlan(null);
