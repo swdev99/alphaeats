@@ -736,7 +736,8 @@ export default function AlphaEatsSite() {
     pdf.rect(margin, cursorY - 6, contentWidth, 42, "F");
     const totalY = cursorY + 24;
     pdf.text("Final Checkout Amount", margin + 10, totalY);
-    pdf.text(normalizeAmount(checkoutAmount.toLocaleString("en-IN")), pageWidth - margin - 5, totalY, { align: "right" });
+    const amountX = pageWidth - margin - 15;
+    pdf.text(normalizeAmount(checkoutAmount.toLocaleString("en-IN")), amountX, totalY, { align: "right" });
 
     const pdfBlob = pdf.output("blob");
     const pdfUrl = URL.createObjectURL(pdfBlob);
