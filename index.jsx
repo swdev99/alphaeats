@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { jsPDF } from "jspdf";
 import mealPhoto from "./images/DSC_2407.jpg";
 import mealPhotoTwo from "./images/DSC_2393.jpg";
 import mealPhotoThree from "./images/DSC_2369.jpg";
@@ -635,7 +636,47 @@ export default function AlphaEatsSite() {
         : "N/A";
       return `Meal Plan ${index + 1}: ${selection.planName}\nPlan Price: ${planPrice}\nStarting From: ${selection.startDate}\nTime Slot: ${selection.timeSlot}\nMeal Type: ${selection.mealType}\nMeal Preference: ${selection.mealPreference || "VEG"}\nSalad Type: ${selection.planName === "Salad Plan" ? (selection.saladType || "Salad Only (Fresh Premium Salad)") : "N/A"}\nAdd-Ons: ${addOnDetails}`;
     }).join("\n\n");
-    const message = `Hi AlphaEats, I want to request a subscription.\n\nName: ${name}\nMobile: ${mobile}\nAdditional Mobile: ${additionalMobile || "N/A"}\nEmail: ${email}\nAddress: ${address}\nAdditional Address: ${additionalAddress || "N/A"}\n\nCheckout Amount: ₹${checkoutAmount.toLocaleString("en-IN")}\n\n${planSummary}`;
+
+    const pdf = new jsPDF();
+    pdf.setFontSize(16);
+    pdf.text("AlphaEats Subscription Request", 14, 20);
+    pdf.setFontSize(11);
+    let cursorY = 38;
+    const addText = (text) => {
+      const lines = pdf.splitTextToSize(text, 180);
+      lines.forEach((line) => {
+        pdf.text(line, 14, cursorY);
+        cursorY += 14;
+      });
+    };
+    addText(`Name: ${name}`);
+    addText(`Mobile: ${mobile}`);
+    addText(`Additional Mobile: ${additionalMobile || "N/A"}`);
+    addText(`Email: ${email}`);
+    addText(`Address: ${address}`);
+    addText(`Additional Address: ${additionalAddress || "N/A"}`);
+    addText(`Checkout Amount: ₹${checkoutAmount.toLocaleString("en-IN")}`);
+    addText("");
+    planSelections.forEach((selection, index) => {
+      addText(`Meal Plan ${index + 1}: ${selection.planName}`);
+      addText(`  Plan Price: ${getPlanPriceLabel(selection)}`);
+      addText(`  Starting From: ${selection.startDate}`);
+      addText(`  Time Slot: ${selection.timeSlot}`);
+      addText(`  Meal Type: ${selection.mealType}`);
+      addText(`  Meal Preference: ${selection.mealPreference || "VEG"}`);
+      addText(`  Salad Type: ${selection.planName === "Salad Plan" ? (selection.saladType || "Salad Only (Fresh Premium Salad)") : "N/A"}`);
+      if (selection.addOns.length) {
+        selection.addOns.forEach((addon) => {
+          addText(`  Add-On: ${addon.value} x ${addon.quantity} = ₹${(addon.quantity * ADD_ON_PRICE).toLocaleString("en-IN")}`);
+        });
+      } else {
+        addText("  Add-Ons: N/A");
+      }
+      addText("");
+    });
+    pdf.save(`AlphaEats-Subscription-${name.replace(/\s+/g, "_") || "request"}.pdf`);
+
+    const message = `Hi AlphaEats, I have generated a subscription request PDF with all details. Please attach the downloaded PDF in the WhatsApp conversation.`;
     const waUrl = `https://wa.me/918805051500?text=${encodeURIComponent(message)}`;
     window.open(waUrl, "_blank", "noopener,noreferrer");
     setSelectedPlan(null);
@@ -1598,7 +1639,7 @@ export default function AlphaEatsSite() {
                   {formError && <p className="plan-modal-error">{formError}</p>}
 
                   <div className="plan-modal-actions">
-                    <button type="submit" className="plan-modal-request">Request Subscription</button>
+                    <button type="submit" className="plan-modal-request">Generate PDF & WhatsApp</button>
                     <button type="button" className="plan-modal-close" onClick={() => {
                       setSelectedPlan(null);
                       setShowAdditionalMobile(false);
