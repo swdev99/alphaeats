@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { jsPDF } from "jspdf";
 import mealPhoto from "./images/DSC_2407.jpg";
 import mealPhotoTwo from "./images/DSC_2393.jpg";
 import mealPhotoThree from "./images/DSC_2369.jpg";
@@ -471,6 +470,17 @@ export default function AlphaEatsSite() {
 
   const checkoutAmount = planSelections.reduce((total, selection) => total + getSelectionTotal(selection), 0);
 
+  const getTomorrowDateString = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const year = tomorrow.getFullYear();
+    const month = `${tomorrow.getMonth() + 1}`.padStart(2, "0");
+    const day = `${tomorrow.getDate()}`.padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const tomorrowDateString = getTomorrowDateString();
+
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % HOME_SLIDES.length);
@@ -617,6 +627,10 @@ export default function AlphaEatsSite() {
         setFormError(`Please select a start date for meal ${index + 1}.`);
         return;
       }
+      if (selection.startDate < tomorrowDateString) {
+        setFormError(`Please choose a start date from tomorrow onwards for meal ${index + 1}.`);
+        return;
+      }
     }
 
     if (showAdditionalMobile && additionalMobile && !/^\d{10}$/.test(additionalMobile)) {
@@ -637,254 +651,7 @@ export default function AlphaEatsSite() {
       return `Meal Plan ${index + 1}: ${selection.planName}\nPlan Price: ${planPrice}\nStarting From: ${selection.startDate}\nTime Slot: ${selection.timeSlot}\nMeal Type: ${selection.mealType}\nMeal Preference: ${selection.mealPreference || "VEG"}\nSalad Type: ${selection.planName === "Salad Plan" ? (selection.saladType || "Salad Only (Fresh Premium Salad)") : "N/A"}\nAdd-Ons: ${addOnDetails}`;
     }).join("\n\n");
 
-    const pdf = new jsPDF({ unit: "pt", format: "a4" });
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 40;
-    const contentWidth = pageWidth - margin * 2;
-
-    pdf.setFillColor("#131B27");
-    pdf.rect(0, 0, pageWidth, 110, "F");
-    pdf.addImage(LOGO_ICON, "PNG", margin, 20, 56, 56);
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(22);
-    pdf.setTextColor("#F3F1EA");
-    pdf.text("ALPHAEATS", margin + 72, 46);
-    pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(10);
-    pdf.text("Fueling the Future of Fitness in India", margin + 72, 64);
-    pdf.setDrawColor("#C9A24B");
-    pdf.setLineWidth(2);
-    pdf.line(margin, 110, pageWidth - margin, 110);
-
-    let cursorY = 132;
-    const rupee = '₹';
-    const normalizeAmount = (value) => {
-      const digits = String(value).replace(/[^0-9,]/g, "").trim();
-      return digits ? `${rupee}${digits}` : "-";
-    };
-    const ensureSpace = (space) => {
-      if (cursorY + space > pageHeight - margin) {
-        pdf.addPage();
-        cursorY = margin;
-      }
-    };
-
-    const addSectionHeader = (title) => {
-      ensureSpace(42);
-      pdf.setFillColor("#F3F1EA");
-      pdf.setTextColor("#131B27");
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(12);
-      pdf.rect(margin, cursorY - 14, contentWidth, 24, "F");
-      pdf.text(title, margin + 10, cursorY + 4);
-      cursorY += 36;
-    };
-
-    const addField = (label, value) => {
-      ensureSpace(30);
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(10);
-      pdf.setTextColor("#131B27");
-      pdf.text(`${label}`, margin, cursorY);
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(10);
-      const wrapped = pdf.splitTextToSize(value || "-", contentWidth);
-      pdf.text(wrapped, margin, cursorY + 14);
-      cursorY += wrapped.length * 14 + 16;
-    };
-
-    const createPreviewImage = () => {
-      const width = 840;
-      const height = 1188;
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, width, height);
-
-      ctx.fillStyle = "#131B27";
-      ctx.fillRect(0, 0, width, 120);
-      ctx.fillStyle = "#F3F1EA";
-      ctx.font = "bold 28px Arial";
-      ctx.fillText("ALPHAEATS", 60, 50);
-      ctx.font = "normal 12px Arial";
-      ctx.fillText("Fueling the Future of Fitness in India", 60, 75);
-      ctx.strokeStyle = "#C9A24B";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(40, 110);
-      ctx.lineTo(width - 40, 110);
-      ctx.stroke();
-
-      let y = 140;
-      const lineHeight = 18;
-      const wrapText = (text, x, maxWidth) => {
-        const words = text.split(" ");
-        let line = "";
-        for (const word of words) {
-          const testLine = line + word + " ";
-          const metrics = ctx.measureText(testLine);
-          if (metrics.width > maxWidth && line) {
-            ctx.fillText(line.trim(), x, y);
-            y += lineHeight;
-            line = `${word} `;
-          } else {
-            line = testLine;
-          }
-        }
-        if (line) {
-          ctx.fillText(line.trim(), x, y);
-          y += lineHeight;
-        }
-      };
-
-      ctx.fillStyle = "#131B27";
-      ctx.font = "bold 12px Arial";
-      ctx.fillText("Customer Information", 40, y);
-      y += 26;
-      const drawField = (label, value) => {
-        ctx.font = "bold 10px Arial";
-        ctx.fillText(`${label}:`, 40, y);
-        ctx.font = "normal 10px Arial";
-        wrapText(value || "-", 180, width - 220);
-        y += 8;
-      };
-
-      drawField("Name", name);
-      drawField("Mobile", mobile);
-      drawField("Additional Mobile", additionalMobile || "N/A");
-      drawField("Email", email);
-      drawField("Address", address);
-      drawField("Additional Address", additionalAddress || "N/A");
-
-      y += 16;
-      ctx.font = "bold 12px Arial";
-      ctx.fillText("Subscription Summary", 40, y);
-      y += 26;
-      planSelections.forEach((selection, index) => {
-        ctx.font = "bold 11px Arial";
-        ctx.fillText(`Plan ${index + 1}: ${selection.planName}`, 40, y);
-        y += 20;
-        ctx.font = "bold 10px Arial";
-        ctx.fillText("Start Date:", 40, y);
-        ctx.font = "normal 10px Arial";
-        ctx.fillText(selection.startDate || "Pending", 140, y);
-        y += lineHeight;
-        ctx.font = "bold 10px Arial";
-        ctx.fillText("Time Slot:", 40, y);
-        ctx.font = "normal 10px Arial";
-        wrapText(selection.timeSlot, 140, width - 220);
-        y += lineHeight;
-        ctx.font = "bold 10px Arial";
-        ctx.fillText("Meal Type:", 40, y);
-        ctx.font = "normal 10px Arial";
-        ctx.fillText(selection.mealType, 140, y);
-        y += lineHeight;
-        ctx.font = "bold 10px Arial";
-        ctx.fillText("Meal Preference:", 40, y);
-        ctx.font = "normal 10px Arial";
-        ctx.fillText(selection.mealPreference || "VEG", 140, y);
-        y += lineHeight;
-        if (selection.planName === "Salad Plan") {
-          ctx.font = "bold 10px Arial";
-          ctx.fillText("Salad Type:", 40, y);
-          ctx.font = "normal 10px Arial";
-          wrapText(selection.saladType || "Salad Only (Fresh Premium Salad)", 140, width - 220);
-          y += lineHeight;
-        }
-        ctx.font = "bold 10px Arial";
-        ctx.fillText("Plan Price:", 40, y);
-        ctx.font = "normal 10px Arial";
-        ctx.fillText(normalizeAmount(getPlanPriceLabel(selection).replace(/^[^\d]*([\d,]+).*$/, "$1")), 140, y);
-        y += lineHeight;
-        if (selection.addOns.length) {
-          ctx.font = "bold 10px Arial";
-          ctx.fillText("Add-Ons:", 40, y);
-          y += lineHeight;
-          selection.addOns.forEach((addon) => {
-            ctx.font = "normal 10px Arial";
-            wrapText(`• ${addon.value} x ${addon.quantity} = ${normalizeAmount((addon.quantity * ADD_ON_PRICE).toLocaleString("en-IN"))}`, 60, width - 100);
-            y += 4;
-          });
-        } else {
-          ctx.font = "bold 10px Arial";
-          ctx.fillText("Add-Ons:", 40, y);
-          ctx.font = "normal 10px Arial";
-          ctx.fillText("N/A", 140, y);
-          y += lineHeight;
-        }
-        y += 10;
-      });
-
-      ctx.fillStyle = "#C9A24B";
-      ctx.fillRect(40, y, width - 80, 42);
-      ctx.fillStyle = "#131B27";
-      ctx.font = "bold 12px Arial";
-      ctx.fillText("Final Checkout Amount", 50, y + 26);
-      ctx.textAlign = "right";
-      ctx.fillText(normalizeAmount(checkoutAmount.toLocaleString("en-IN")), width - 50, y + 26);
-      ctx.textAlign = "start";
-
-      return canvas.toDataURL("image/png");
-    };
-
-    addSectionHeader("Customer Information");
-    addField("Name", name);
-    addField("Mobile", mobile);
-    addField("Additional Mobile", additionalMobile || "N/A");
-    addField("Email", email);
-    addField("Address", address);
-    addField("Additional Address", additionalAddress || "N/A");
-
-    addSectionHeader("Subscription Summary");
-    planSelections.forEach((selection, index) => {
-      ensureSpace(110);
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(11);
-      pdf.setTextColor("#131B27");
-      pdf.text(`Plan ${index + 1}: ${selection.planName}`, margin, cursorY);
-      cursorY += 18;
-      addField("Start Date", selection.startDate || "Pending");
-      addField("Time Slot", selection.timeSlot);
-      addField("Meal Type", selection.mealType);
-      addField("Meal Preference", selection.mealPreference || "VEG");
-      if (selection.planName === "Salad Plan") {
-        addField("Salad Type", selection.saladType || "Salad Only (Fresh Premium Salad)");
-      }
-      addField("Plan Price", normalizeAmount(getPlanPriceLabel(selection).replace(/^[^\d]*([\d,]+).*$/, "$1")));
-      if (selection.addOns.length) {
-        const addonLines = selection.addOns.map((addon) => `• ${addon.value} x ${addon.quantity} = ${normalizeAmount((addon.quantity * ADD_ON_PRICE).toLocaleString("en-IN"))}`);
-        addField("Add-Ons", addonLines.join("\n"));
-      } else {
-        addField("Add-Ons", "N/A");
-      }
-      cursorY += 10;
-    });
-
-    ensureSpace(80);
-    pdf.setFillColor("#C9A24B");
-    pdf.setDrawColor("#C9A24B");
-    pdf.setTextColor("#131B27");
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(12);
-    pdf.rect(margin, cursorY - 6, contentWidth, 42, "F");
-    const totalY = cursorY + 24;
-    pdf.text("Final Checkout Amount", margin + 10, totalY);
-    const amountX = pageWidth - margin - 15;
-    pdf.text(normalizeAmount(checkoutAmount.toLocaleString("en-IN")), amountX, totalY, { align: "right" });
-
-    const pdfBlob = pdf.output("blob");
-    const pdfUrl = URL.createObjectURL(pdfBlob);
-    window.open(pdfUrl, "_blank", "noopener,noreferrer");
-
-    const imageUrl = createPreviewImage();
-    if (imageUrl) {
-      window.open(imageUrl, "_blank", "noopener,noreferrer");
-    }
-
-    const message = `Hi AlphaEats, the request details are ready for review. Please save the open image or attach the PDF in WhatsApp.`;
+    const message = `Hi AlphaEats, the subscription request is ready for review.\n\nCustomer: ${name}\nMobile: ${mobile}\nEmail: ${email}\nAddress: ${address}\n\n${planSummary}\n\nTotal Checkout: ₹${checkoutAmount.toLocaleString("en-IN")}`;
     const waUrl = `https://wa.me/918805051500?text=${encodeURIComponent(message)}`;
     window.open(waUrl, "_blank", "noopener,noreferrer");
     setSelectedPlan(null);
@@ -1724,6 +1491,7 @@ export default function AlphaEatsSite() {
                               type="date"
                               name="startDate"
                               value={selection.startDate}
+                              min={tomorrowDateString}
                               onChange={(event) => handlePlanSelectionChange(index, event)}
                               required
                             />
