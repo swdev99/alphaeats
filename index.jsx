@@ -658,7 +658,7 @@ export default function AlphaEatsSite() {
     pdf.line(margin, 110, pageWidth - margin, 110);
 
     let cursorY = 132;
-    const rupee = String.fromCharCode(8377);
+    const rupee = '₹';
     const normalizeAmount = (value) => {
       const digits = String(value).replace(/[^0-9,]/g, "").trim();
       return digits ? `${rupee}${digits}` : "-";
@@ -735,8 +735,8 @@ export default function AlphaEatsSite() {
     pdf.setFontSize(12);
     pdf.rect(margin, cursorY - 6, contentWidth, 42, "F");
     const totalY = cursorY + 24;
-    pdf.text("Final Checkout Amount", margin + 10, totalY);
-    pdf.text(normalizeAmount(checkoutAmount.toLocaleString("en-IN")), pageWidth - margin - 10, totalY, { align: "right" });
+    pdf.text("Final Checkout Amount", pageWidth / 2, totalY - 8, { align: "center" });
+    pdf.text(normalizeAmount(checkoutAmount.toLocaleString("en-IN")), pageWidth / 2, totalY + 8, { align: "center" });
 
     const pdfBlob = pdf.output("blob");
     const pdfUrl = URL.createObjectURL(pdfBlob);
