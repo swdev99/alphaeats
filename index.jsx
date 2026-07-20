@@ -658,6 +658,11 @@ export default function AlphaEatsSite() {
     pdf.line(margin, 110, pageWidth - margin, 110);
 
     let cursorY = 132;
+    const rupee = String.fromCharCode(8377);
+    const normalizeAmount = (value) => {
+      const digits = String(value).replace(/[^ -\d,]/g, "").trim();
+      return digits ? `${rupee}${digits}` : "-";
+    };
     const ensureSpace = (space) => {
       if (cursorY + space > pageHeight - margin) {
         pdf.addPage();
@@ -696,7 +701,7 @@ export default function AlphaEatsSite() {
     addField("Email", email);
     addField("Address", address);
     addField("Additional Address", additionalAddress || "N/A");
-    addField("Checkout Amount", `₹${checkoutAmount.toLocaleString("en-IN")}`);
+    addField("Checkout Amount", normalizeAmount(checkoutAmount.toLocaleString("en-IN")));
 
     addSectionHeader("Subscription Summary");
     planSelections.forEach((selection, index) => {
@@ -713,9 +718,9 @@ export default function AlphaEatsSite() {
       if (selection.planName === "Salad Plan") {
         addField("Salad Type", selection.saladType || "Salad Only (Fresh Premium Salad)");
       }
-      addField("Plan Price", `₹${getPlanPriceLabel(selection).replace(/^[^₹]*₹?/, "").trim()}`);
+      addField("Plan Price", normalizeAmount(getPlanPriceLabel(selection).replace(/^[^\d]*([\d,]+).*$/, "$1")));
       if (selection.addOns.length) {
-        const addonLines = selection.addOns.map((addon) => `• ${addon.value} x ${addon.quantity} = ₹${(addon.quantity * ADD_ON_PRICE).toLocaleString("en-IN")}`);
+        const addonLines = selection.addOns.map((addon) => `• ${addon.value} x ${addon.quantity} = ${normalizeAmount((addon.quantity * ADD_ON_PRICE).toLocaleString("en-IN"))}`);
         addField("Add-Ons", addonLines.join("\n"));
       } else {
         addField("Add-Ons", "N/A");
@@ -732,7 +737,7 @@ export default function AlphaEatsSite() {
     pdf.rect(margin, cursorY - 6, contentWidth, 42, "F");
     const totalY = cursorY + 24;
     pdf.text("Final Checkout Amount", margin + 10, totalY);
-    pdf.text(`₹${checkoutAmount.toLocaleString("en-IN")}`, pageWidth - margin - 10, totalY, { align: "right" });
+    pdf.text(normalizeAmount(checkoutAmount.toLocaleString("en-IN")), pageWidth - margin - 10, totalY, { align: "right" });
 
     const pdfBlob = pdf.output("blob");
     const pdfUrl = URL.createObjectURL(pdfBlob);
