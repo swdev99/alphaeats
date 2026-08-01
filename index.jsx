@@ -287,7 +287,7 @@ const HOME_SLIDES = [
   {
     image: mealPhotoThree,
     eyebrow: "Daily Doorstep Delivery",
-    title: "Your Nutrition Routine,\nSimplified",
+    title: "Simplified Nutrition Plan",
     copy: "A full-screen branded experience that turns daily meal delivery into a premium health ritual.",
   },
   {
@@ -299,7 +299,7 @@ const HOME_SLIDES = [
   {
     image: mealPhotoFive,
     eyebrow: "Consistency at Scale",
-    title: "Branded Nutrition for\nBusy Lives",
+    title: "Branded Food for Busy Lives",
     copy: "From busy professionals to serious athletes, AlphaEats removes the daily friction of staying on-plan.",
   },
 ];
@@ -654,6 +654,7 @@ export default function AlphaEatsSite() {
           font-family: 'Work Sans', sans-serif;
           min-height: 100vh;
           overflow-x: hidden;
+          width: 100%;
         }
         .ae-root * { box-sizing: border-box; }
         .display { font-family: 'Playfair Display', serif; }
@@ -672,7 +673,7 @@ export default function AlphaEatsSite() {
           position: sticky; top: 0; z-index: 40;
           display: flex; align-items: center; justify-content: space-between;
           gap: 12px; flex-wrap: wrap;
-          padding: 18px 6vw; background: rgba(19,27,39,0.86);
+          padding: 18px clamp(16px, 4vw, 32px); background: rgba(19,27,39,0.86);
           backdrop-filter: blur(10px); border-bottom: 1px solid rgba(201,162,75,0.16);
         }
         .nav-brand { display: flex; align-items: center; gap: 12px; }
@@ -690,10 +691,11 @@ export default function AlphaEatsSite() {
         /* HERO — full-screen animated slideshow */
         .hero {
           position: relative;
-          min-height: 100vh;
-          height: 100vh;
+          min-height: 100svh;
+          min-height: 100dvh;
+          height: auto;
           overflow: hidden;
-          display: grid;
+          display: flex;
           align-items: center;
         }
         .hero-slide {
@@ -730,7 +732,7 @@ export default function AlphaEatsSite() {
           position: relative;
           z-index: 2;
           width: min(760px, 100%);
-          padding: 10vw 6vw 6vw;
+          padding: clamp(96px, 12vh, 140px) clamp(16px, 4vw, 32px) clamp(32px, 6vh, 64px);
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -738,8 +740,9 @@ export default function AlphaEatsSite() {
         .hero-rule { display: none; }
         .hero-title {
           max-width: 600px;
-          min-height: 8.2rem;
+          min-height: clamp(6rem, 8vw, 8.2rem);
           white-space: pre-line;
+          overflow-wrap: anywhere;
         }
         .hero-quote {
           font-style: italic; color: var(--bone);
@@ -777,7 +780,7 @@ export default function AlphaEatsSite() {
         .why-text { color: var(--bone); font-size: 1.08rem; font-weight: 500; }
 
         /* GENERIC SECTION */
-        .section { padding: 8vw 6vw; }
+        .section { padding: clamp(56px, 8vw, 96px) clamp(16px, 4vw, 32px); }
         .section-head { max-width: 680px; margin-bottom: 52px; }
         .section-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 3.4vw, 2.8rem); font-weight: 700; color: var(--bone); }
         .section-sub { color: var(--slate); margin-top: 14px; font-size: 1.12rem; line-height: 1.7; }
@@ -1008,7 +1011,7 @@ export default function AlphaEatsSite() {
         .foot-brand { display: flex; align-items: center; gap: 10px; }
 
         @media (max-width: 900px) {
-          .hero { grid-template-columns: 1fr; }
+          .hero { display: flex; }
           .hero-divider { display: none; }
           .feat-grid { grid-template-columns: 1fr; }
           .card-grid-2 { grid-template-columns: 1fr; }
@@ -1025,7 +1028,7 @@ export default function AlphaEatsSite() {
 
         @media (max-width: 640px) {
           .nav {
-            padding: 14px 5vw;
+            padding: 14px clamp(14px, 4vw, 20px);
           }
           .plan-modal-inline-row,
           .plan-modal-inline-row.two-up {
@@ -1040,22 +1043,31 @@ export default function AlphaEatsSite() {
           }
           .hero {
             min-height: 100svh;
-            height: 100svh;
+            min-height: 100dvh;
+            height: auto;
           }
           .hero-content {
-            padding: 20vw 5vw 7vw;
+            padding: clamp(88px, 16vw, 120px) clamp(16px, 4vw, 20px) clamp(24px, 6vw, 40px);
           }
           .hero-title {
             min-height: auto;
             white-space: normal;
-            font-size: clamp(2rem, 10vw, 2.8rem) !important;
+            font-size: clamp(1.9rem, 8vw, 2.6rem) !important;
           }
           .hero-quote {
             font-size: 0.98rem;
             line-height: 1.6;
           }
+          .hero-cta-row {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          .hero-cta {
+            width: 100%;
+            text-align: center;
+          }
           .section {
-            padding: 18vw 5vw;
+            padding: clamp(48px, 14vw, 72px) clamp(16px, 4vw, 20px);
           }
           .plan-grid-4,
           .stat-grid,
@@ -1066,6 +1078,15 @@ export default function AlphaEatsSite() {
           }
           .plan-modal-overlay {
             padding: 12px;
+          }
+          .problem-card,
+          .feat-card,
+          .plan-body,
+          .step-card,
+          .tier-card,
+          .phase-card {
+            padding-left: 18px;
+            padding-right: 18px;
           }
           .plan-modal {
             width: 100%;
