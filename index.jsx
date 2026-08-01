@@ -1192,6 +1192,20 @@ export default function AlphaEatsSite() {
         .zone-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
         .zone-chip { border: 1px solid #D8D4C8; padding: 12px 8px; text-align: center; font-weight: 600; font-size: 0.88rem; color: var(--ink); background: #fff; }
 
+        @media (max-width: 920px) {
+          .zone-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 660px) {
+          .zone-grid { grid-template-columns: repeat(2, 1fr); }
+          .zone-chip { padding: 12px 10px; font-size: 0.82rem; }
+        }
+
+        @media (max-width: 460px) {
+          .zone-grid { grid-template-columns: 1fr; }
+          .zone-chip { text-align: left; }
+        }
+
         /* Premium Ingredients / What We Serve */
         .premium-section { margin-top: 48px; padding-top: 12px; }
         .premium-sub { color: #6B7280; font-size: 0.95rem; margin-bottom: 12px; }
