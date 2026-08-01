@@ -251,6 +251,8 @@ const ROADMAP = [
   },
 ];
 
+const ADD_ON_PRICE = 149;
+
 const ADD_ONS = [
   "Pineapple Healthy Smoothie",
   "Dragon Fruit Healthy Smoothie",
@@ -459,7 +461,25 @@ export default function AlphaEatsSite() {
     return `${priceValue}`;
   };
 
-  const checkoutAmount = planSelections.reduce((total, selection) => total + getPlanPriceForSelection(selection), 0);
+  const getPlanAddOnTotal = (selection) => selection.addOns.reduce((total, addon) => {
+    const quantity = Number(addon.quantity) || 0;
+    return total + quantity * ADD_ON_PRICE;
+  }, 0);
+
+  const getSelectionTotal = (selection) => getPlanPriceForSelection(selection) + getPlanAddOnTotal(selection);
+
+  const checkoutAmount = planSelections.reduce((total, selection) => total + getSelectionTotal(selection), 0);
+
+  const getTomorrowDateString = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const year = tomorrow.getFullYear();
+    const month = `${tomorrow.getMonth() + 1}`.padStart(2, "0");
+    const day = `${tomorrow.getDate()}`.padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const tomorrowDateString = getTomorrowDateString();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -521,10 +541,27 @@ export default function AlphaEatsSite() {
     setFormError("");
     setPlanSelections((prev) => prev.map((item, itemIndex) => {
       if (itemIndex !== index) return item;
-      const exists = item.addOns.includes(value);
+      const existingAddOn = item.addOns.find((addon) => addon.value === value);
       return {
         ...item,
-        addOns: exists ? item.addOns.filter((entry) => entry !== value) : [...item.addOns, value],
+        addOns: existingAddOn
+          ? item.addOns.filter((addon) => addon.value !== value)
+          : [...item.addOns, { value, quantity: 1 }],
+      };
+    }));
+  };
+
+  const handlePlanAddOnQuantityChange = (index, value, delta) => {
+    setFormError("");
+    setPlanSelections((prev) => prev.map((item, itemIndex) => {
+      if (itemIndex !== index) return item;
+      return {
+        ...item,
+        addOns: item.addOns.map((addon) => {
+          if (addon.value !== value) return addon;
+          const nextQuantity = Math.max(1, Number(addon.quantity) + delta);
+          return { ...addon, quantity: nextQuantity };
+        }),
       };
     }));
   };
@@ -590,6 +627,10 @@ export default function AlphaEatsSite() {
         setFormError(`Please select a start date for meal ${index + 1}.`);
         return;
       }
+      if (selection.startDate < tomorrowDateString) {
+        setFormError(`Please choose a start date from tomorrow onwards for meal ${index + 1}.`);
+        return;
+      }
     }
 
     if (showAdditionalMobile && additionalMobile && !/^\d{10}$/.test(additionalMobile)) {
@@ -604,9 +645,13 @@ export default function AlphaEatsSite() {
 
     const planSummary = planSelections.map((selection, index) => {
       const planPrice = getPlanPriceLabel(selection);
-      return `Meal Plan ${index + 1}: ${selection.planName}\nPlan Price: ${planPrice}\nStarting From: ${selection.startDate}\nTime Slot: ${selection.timeSlot}\nMeal Type: ${selection.mealType}\nMeal Preference: ${selection.mealPreference || "VEG"}\nSalad Type: ${selection.planName === "Salad Plan" ? (selection.saladType || "Salad Only (Fresh Premium Salad)") : "N/A"}\nAdd-Ons: ${selection.addOns.length ? selection.addOns.join(", ") : "N/A"}`;
+      const addOnDetails = selection.addOns.length
+        ? selection.addOns.map((addon) => `${addon.value} x ${addon.quantity}`).join(", ")
+        : "N/A";
+      return `Meal Plan ${index + 1}: ${selection.planName}\nPlan Price: ${planPrice}\nStarting From: ${selection.startDate}\nTime Slot: ${selection.timeSlot}\nMeal Type: ${selection.mealType}\nMeal Preference: ${selection.mealPreference || "VEG"}\nSalad Type: ${selection.planName === "Salad Plan" ? (selection.saladType || "Salad Only (Fresh Premium Salad)") : "N/A"}\nAdd-Ons: ${addOnDetails}`;
     }).join("\n\n");
-    const message = `Hi AlphaEats, I want to request a subscription.\n\nName: ${name}\nMobile: ${mobile}\nAdditional Mobile: ${additionalMobile || "N/A"}\nEmail: ${email}\nAddress: ${address}\nAdditional Address: ${additionalAddress || "N/A"}\n\nCheckout Amount: ₹${checkoutAmount.toLocaleString("en-IN")}\n\n${planSummary}`;
+
+    const message = `Hi AlphaEats, the subscription request is ready for review.\n\nCustomer: ${name}\nMobile: ${mobile}\nEmail: ${email}\nAddress: ${address}\n\n${planSummary}\n\nTotal Checkout: ₹${checkoutAmount.toLocaleString("en-IN")}`;
     const waUrl = `https://wa.me/918805051500?text=${encodeURIComponent(message)}`;
     window.open(waUrl, "_blank", "noopener,noreferrer");
     setSelectedPlan(null);
@@ -892,9 +937,30 @@ export default function AlphaEatsSite() {
         .plan-modal-addon-grid {
           display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x proximity;
         }
+        .plan-modal-addon-card-wrapper {
+          display: grid; gap: 8px;
+          min-width: 180px; flex: 0 0 180px;
+        }
         .plan-modal-addon-card {
           border: 1px solid #D6D0C5; background: #fff; color: var(--ink); padding: 12px 10px; text-align: left;
-          cursor: pointer; transition: all .2s ease; min-width: 180px; flex: 0 0 180px; scroll-snap-align: start;
+          cursor: pointer; transition: all .2s ease; height: 100%; display: grid;
+        }
+        .plan-modal-addon-card:hover {
+          border-color: var(--gold); transform: translateY(-1px);
+        }
+        .plan-modal-addon-card.selected {
+          border-color: var(--gold); background: rgba(201,162,75,0.12);
+        }
+        .plan-modal-addon-price { font-size: 0.82rem; color: #4B5563; margin-top: 8px; }
+        .plan-modal-addon-quantity {
+          display: flex; align-items: center; justify-content: space-between; gap: 8px;
+        }
+        .plan-modal-addon-quantity button {
+          min-width: 32px; min-height: 32px; border-radius: 8px; border: 1px solid #D1D5DB;
+          background: #fff; cursor: pointer; font-size: 1rem;
+        }
+        .plan-modal-addon-quantity span {
+          min-width: 24px; text-align: center;
         }
         .plan-modal-addon-card:hover {
           border-color: var(--gold); transform: translateY(-1px);
@@ -1446,6 +1512,7 @@ export default function AlphaEatsSite() {
                               type="date"
                               name="startDate"
                               value={selection.startDate}
+                              min={tomorrowDateString}
                               onChange={(event) => handlePlanSelectionChange(index, event)}
                               required
                             />
@@ -1497,18 +1564,41 @@ export default function AlphaEatsSite() {
                           <span>Add-Ons</span>
                           <div className="plan-modal-addon-grid">
                             {ADD_ONS.map((addon) => {
-                              const selected = selection.addOns.includes(addon.value);
+                              const selectedAddOn = selection.addOns.find((item) => item.value === addon.value);
+                              const selected = Boolean(selectedAddOn);
+                              const quantity = selectedAddOn?.quantity || 1;
                               return (
-                                <button
-                                  key={`${selection.planName}-${addon.value}`}
-                                  type="button"
-                                  className={`plan-modal-addon-card ${selected ? "selected" : ""}`}
-                                  aria-pressed={selected}
-                                  onClick={() => handlePlanAddOnToggle(index, addon.value)}
-                                >
-                                  <div className="plan-modal-addon-name">{addon.label}</div>
-                                  <div className="plan-modal-addon-size">350 ML</div>
-                                </button>
+                                <div key={`${selection.planName}-${addon.value}`} className="plan-modal-addon-card-wrapper">
+                                  <button
+                                    type="button"
+                                    className={`plan-modal-addon-card ${selected ? "selected" : ""}`}
+                                    aria-pressed={selected}
+                                    onClick={() => handlePlanAddOnToggle(index, addon.value)}
+                                  >
+                                    <div className="plan-modal-addon-name">{addon.label}</div>
+                                    <div className="plan-modal-addon-size">350 ML</div>
+                                    <div className="plan-modal-addon-price">₹{ADD_ON_PRICE}</div>
+                                  </button>
+                                  {selected && (
+                                    <div className="plan-modal-addon-quantity">
+                                      <button
+                                        type="button"
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          handlePlanAddOnQuantityChange(index, addon.value, -1);
+                                        }}
+                                      >-</button>
+                                      <span>{quantity}</span>
+                                      <button
+                                        type="button"
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          handlePlanAddOnQuantityChange(index, addon.value, 1);
+                                        }}
+                                      >+</button>
+                                    </div>
+                                  )}
+                                </div>
                               );
                             })}
                           </div>
@@ -1523,9 +1613,17 @@ export default function AlphaEatsSite() {
                     <div className="plan-modal-summary-title">Checkout Summary</div>
                     {planSelections.map((selection, index) => {
                       return (
-                        <div key={`${selection.planName}-${index}`} className="plan-modal-summary-item">
-                          <span>Meal Plan {index + 1}: {selection.planName}</span>
-                          <strong>{getPlanPriceLabel(selection)}</strong>
+                        <div key={`${selection.planName}-${index}`} className="plan-modal-summary-group">
+                          <div className="plan-modal-summary-item">
+                            <span>Meal Plan {index + 1}: {selection.planName}</span>
+                            <strong>{getPlanPriceLabel(selection)}</strong>
+                          </div>
+                          {selection.addOns.length > 0 && selection.addOns.map((addon) => (
+                            <div key={`${index}-${addon.value}`} className="plan-modal-summary-item plan-modal-summary-addon">
+                              <span>{addon.value} x {addon.quantity}</span>
+                              <span>₹{(addon.quantity * ADD_ON_PRICE).toLocaleString("en-IN")}</span>
+                            </div>
+                          ))}
                         </div>
                       );
                     })}
