@@ -34,10 +34,10 @@ const WHY = [
 ];
 
 const PROBLEMS = [
-  { icon: "🍕", title: "No Macro Tracking", copy: "Restaurants and tiffin services give zero nutritional info. You eat blind every day." },
-  { icon: "⏰", title: "No Consistency", copy: "Home cooking is time-consuming. Ordering daily leads to random, unplanned nutrition." },
-  { icon: "💸", title: "Expensive Gyms, Poor Diet", copy: "Pune spends crores on fitness memberships but neglects the 80% rule: diet is everything." },
-  { icon: "😔", title: "One-Size-Fits-All", copy: "Generic tiffin services ignore your goals. A bodybuilder and a dieter eat the same food." },
+  { icon: "📊", title: "No Macro Tracking", copy: "Restaurants and tiffin services give zero nutritional info. You eat blind every day." },
+  { icon: "🧭", title: "No Consistency", copy: "Home cooking is time-consuming. Ordering daily leads to random, unplanned nutrition." },
+  { icon: "💳", title: "Expensive Gyms, Poor Diet", copy: "Pune spends crores on fitness memberships but neglects the 80% rule: diet is everything." },
+  { icon: "🎯", title: "One-Size-Fits-All", copy: "Generic tiffin services ignore your goals. A bodybuilder and a dieter eat the same food." },
 ];
 
 const SOLUTIONS = [
@@ -272,6 +272,15 @@ const CONTACT = {
   email: "contact@alphaeatss.com",
   address: "Pune, Maharashtra, India",
 };
+
+const TESTIMONIALS = [
+  { name: "Aditi Sharma", role: "Weight Loss Client", quote: "The meals are so convenient and tasty. I finally feel in control of my diet without spending hours cooking." },
+  { name: "Rahul Mehta", role: "Gym Enthusiast", quote: "Protein was spot on and the portions felt perfect for my training days. I noticed better recovery within weeks." },
+  { name: "Sneha Patil", role: "Busy Professional", quote: "I love how consistent everything is. The delivery is reliable and the food feels fresh every single day." },
+  { name: "Vikram Rao", role: "Fitness Beginner", quote: "The plan made healthy eating simple for me. I never felt restricted and still achieved my goals." },
+  { name: "Neha Joshi", role: "Corporate Client", quote: "Great taste, great hygiene, and no hassle. It made my routine so much easier during workdays." },
+  { name: "Kunal Deshpande", role: "Athlete", quote: "The macros were accurate and the service was premium. It felt like a proper nutrition partner." },
+];
 
 const HOME_SLIDES = [
   {
@@ -847,11 +856,89 @@ export default function AlphaEatsSite() {
           display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.7); font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; }
 
         /* PROBLEM CARDS */
-        .card-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        .problem-card { background: #fff; border: 1px solid #E5E3DC; padding: 32px; }
-        .problem-icon { width: 56px; height: 56px; border-radius: 50%; background: #FBEFD9; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 18px; }
-        .problem-title { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.2rem; color: var(--ink); margin-bottom: 10px; }
-        .problem-copy { color: #5B6472; font-size: 0.96rem; line-height: 1.6; }
+        .card-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+        .problem-card {
+          position: relative;
+          background: linear-gradient(135deg, #ffffff 0%, #fffdf7 100%);
+          border: 1px solid rgba(201,162,75,0.18);
+          border-radius: 20px;
+          padding: 28px 24px;
+          box-shadow: 0 14px 32px rgba(19,27,39,0.06);
+          overflow: hidden;
+          transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+          animation: slideInCard .7s ease both;
+        }
+        .problem-card:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 20px 40px rgba(19,27,39,0.12);
+          border-color: var(--gold);
+        }
+        .problem-card:nth-child(2n) {
+          animation-delay: 0.12s;
+        }
+        .problem-card:nth-child(3n) {
+          animation-delay: 0.24s;
+        }
+        .problem-card:nth-child(4n) {
+          animation-delay: 0.36s;
+        }
+        .problem-card::before {
+          content: "";
+          position: absolute;
+          inset: auto -28px -28px auto;
+          width: 120px;
+          height: 120px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(201,162,75,0.18) 0%, rgba(201,162,75,0) 70%);
+          pointer-events: none;
+        }
+        .problem-icon {
+          width: 58px;
+          height: 58px;
+          border-radius: 16px;
+          background: linear-gradient(135deg, var(--gold-l) 0%, var(--gold) 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.6rem;
+          margin-bottom: 18px;
+          box-shadow: 0 10px 24px rgba(201,162,75,0.24);
+          animation: problemFloat 3s ease-in-out infinite;
+        }
+        .problem-card:hover .problem-icon {
+          animation: problemPulse 0.7s ease-in-out;
+        }
+        .problem-title {
+          font-family: 'Playfair Display', serif;
+          font-weight: 700;
+          font-size: 1.2rem;
+          color: var(--ink);
+          margin-bottom: 10px;
+        }
+        .problem-copy {
+          color: #5B6472;
+          font-size: 0.96rem;
+          line-height: 1.7;
+        }
+        @keyframes problemFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
+        }
+        @keyframes problemPulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.06); }
+          100% { transform: scale(1); }
+        }
+        @keyframes slideInCard {
+          from {
+            opacity: 0;
+            transform: translateX(28px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
 
         /* SOLUTION GRID */
         .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(201,162,75,0.18); border: 1px solid rgba(201,162,75,0.18); }
@@ -1063,8 +1150,24 @@ export default function AlphaEatsSite() {
         }
         .cta-btn:hover { background: var(--gold-l); transform: translateY(-2px); }
 
-        .contact-band { background: var(--navy-2); border-top: 1px solid rgba(201,162,75,0.16); padding: 6vw 6vw; }
-        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+        .contact-band { background: linear-gradient(135deg, var(--navy-2) 0%, #172132 100%); border-top: 1px solid rgba(201,162,75,0.16); padding: 6vw 6vw; }
+        .contact-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 40px; align-items: center; }
+        .contact-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(201,162,75,0.16); padding: 24px; border-radius: 18px; }
+        .contact-card-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--gold-l); margin-bottom: 12px; }
+        .contact-card-copy { color: var(--bone); font-size: 0.96rem; line-height: 1.7; margin-bottom: 18px; }
+        .contact-list { display: flex; flex-direction: column; gap: 14px; }
+        .contact-row { display: flex; align-items: flex-start; gap: 14px; font-size: 1rem; color: var(--bone); line-height: 1.55; }
+        .contact-icon { width: 38px; height: 38px; border-radius: 50%; background: rgba(201,162,75,0.14); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .contact-meta { display: grid; gap: 12px; }
+        .contact-meta-item { padding: 12px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(201,162,75,0.12); border-radius: 12px; }
+        .contact-meta-label { font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold-l); margin-bottom: 6px; font-weight: 700; }
+        .contact-meta-value { color: var(--bone); font-size: 0.95rem; line-height: 1.5; }
+        .testimonial-section { padding: 0 6vw 6vw; background: var(--navy); }
+        .testimonial-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+        .testimonial-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(201,162,75,0.16); padding: 22px; min-height: 100%; }
+        .testimonial-quote { color: var(--bone); font-size: 0.96rem; line-height: 1.7; margin-bottom: 16px; }
+        .testimonial-name { font-weight: 700; color: var(--gold-l); margin-bottom: 4px; }
+        .testimonial-role { font-size: 0.82rem; color: var(--slate); text-transform: uppercase; letter-spacing: 0.08em; }
         .contact-list { display: flex; flex-direction: column; gap: 16px; }
         .contact-row { display: flex; align-items: center; gap: 14px; font-size: 1rem; color: var(--bone); }
         .contact-icon { width: 34px; height: 34px; border-radius: 50%; background: rgba(201,162,75,0.14); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
@@ -1078,6 +1181,7 @@ export default function AlphaEatsSite() {
 
         @media (max-width: 900px) {
           .hero { display: flex; }
+          .testimonial-grid { grid-template-columns: 1fr 1fr; }
           .hero-divider { display: none; }
           .feat-grid { grid-template-columns: 1fr; }
           .card-grid-2 { grid-template-columns: 1fr; }
@@ -1135,6 +1239,8 @@ export default function AlphaEatsSite() {
           .section {
             padding: clamp(48px, 14vw, 72px) clamp(16px, 4vw, 20px);
           }
+          .testimonial-section { padding: 0 clamp(16px, 4vw, 20px) 48px; }
+          .testimonial-grid { grid-template-columns: 1fr; }
           .plan-grid-4,
           .stat-grid,
           .steps-row,
@@ -1183,7 +1289,6 @@ export default function AlphaEatsSite() {
         <div className="nav-links">
           <a href="#about">About</a>
           <a href="#plans">Plans</a>
-          <a href="#how">How It Works</a>
           <a href="#zones">Coverage</a>
           <a href="#contact">Contact</a>
         </div>
@@ -1252,49 +1357,6 @@ export default function AlphaEatsSite() {
               </div>
             </div>
           </Reveal>
-        </div>
-      </section>
-
-      {/* THE PROBLEM */}
-      <section className="section light">
-        <Reveal>
-          <div className="section-head">
-            <SectionLabel>The Problem</SectionLabel>
-            <h2 className="section-title">Eating Right in Pune Is Broken</h2>
-          </div>
-        </Reveal>
-        <div className="card-grid-2">
-          {PROBLEMS.map((p, i) => (
-            <Reveal key={p.title} delay={i * 80}>
-              <div className="problem-card">
-                <div className="problem-icon">{p.icon}</div>
-                <div className="problem-title">{p.title}</div>
-                <div className="problem-copy">{p.copy}</div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* OUR SOLUTION */}
-      <section className="section">
-        <Reveal>
-          <div className="section-head">
-            <SectionLabel>Our Solution</SectionLabel>
-            <h2 className="section-title display">Precision Nutrition, Daily Delivered</h2>
-            <p className="section-sub">Expertly crafted, macro-calculated meals tailored to your fitness goal — right to your door, every single day.</p>
-          </div>
-        </Reveal>
-        <div className="feat-grid">
-          {SOLUTIONS.map((f, i) => (
-            <Reveal key={f.title} delay={i * 60}>
-              <div className="feat-card">
-                <span className="feat-icon">{f.icon}</span>
-                <div className="feat-title">{f.title}</div>
-                <div className="feat-copy">{f.copy}</div>
-              </div>
-            </Reveal>
-          ))}
         </div>
       </section>
 
@@ -1651,28 +1713,26 @@ export default function AlphaEatsSite() {
         )}
       </section>
 
-      {/* HOW IT WORKS */}
-      <section className="section" id="how">
+      {/* THE PROBLEM */}
+      <section className="section light">
         <Reveal>
           <div className="section-head">
-            <SectionLabel>Process</SectionLabel>
-            <h2 className="section-title display">How AlphaEats Works</h2>
-            <p className="section-sub">From enrollment to your door — every single day.</p>
+            <SectionLabel>The Problem</SectionLabel>
+            <h2 className="section-title">Eating Right in Pune Is Broken</h2>
+            <p className="section-sub">Most nutrition options are either inconsistent, vague, or simply not built around your goal.</p>
           </div>
         </Reveal>
-        <div className="steps-row">
-          {STEPS.map((s, i) => (
-            <Reveal key={s.n} delay={i * 70}>
-              <div className="step-card">
-                <div className="step-n">{s.n}</div>
-                <div className="step-icon">{s.icon}</div>
-                <div className="step-title">{s.title}</div>
-                <div className="step-copy">{s.copy}</div>
+        <div className="card-grid-2">
+          {PROBLEMS.map((p, i) => (
+            <Reveal key={p.title} delay={i * 80}>
+              <div className="problem-card">
+                <div className="problem-icon">{p.icon}</div>
+                <div className="problem-title">{p.title}</div>
+                <div className="problem-copy">{p.copy}</div>
               </div>
             </Reveal>
           ))}
         </div>
-        <p className="steps-footnote">Repeat daily until plan ends. System auto-generates each day's order.</p>
       </section>
 
       {/* TRACTION + ZONES */}
@@ -1701,60 +1761,61 @@ export default function AlphaEatsSite() {
         </Reveal>
       </section>
 
-      {/* VISION & ROADMAP */}
-      <section className="section light">
+      {/* TESTIMONIALS */}
+      <section className="testimonial-section">
         <Reveal>
-          <div className="section-head">
-            <SectionLabel>Vision &amp; Roadmap</SectionLabel>
-            <h2 className="section-title">AlphaEats is building India's most trusted precision nutrition brand.</h2>
+          <div className="section-head" style={{ marginTop: 16, marginBottom: 24 }}>
+            <SectionLabel>Customer Reviews</SectionLabel>
+            <h2 className="section-title">What our customers are saying</h2>
           </div>
         </Reveal>
-        <div className="roadmap-grid">
-          {ROADMAP.map((r, i) => (
-            <Reveal key={r.phase} delay={i * 90}>
-              <div className="phase-card">
-                <div className="phase-head" style={{ background: r.color }}>
-                  <div className="phase-name">{r.phase}</div>
-                  <div className="phase-span">{r.span}</div>
-                </div>
-                <div className="phase-body">
-                  {r.items.map((item) => (
-                    <div className="phase-item" key={item}>
-                      <span className="phase-dot" style={{ background: r.color }} />
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
+        <div className="testimonial-grid">
+          {TESTIMONIALS.map((item, index) => (
+            <Reveal key={item.name} delay={index * 60}>
+              <div className="testimonial-card">
+                <div className="testimonial-quote">“{item.quote}”</div>
+                <div className="testimonial-name">{item.name}</div>
+                <div className="testimonial-role">{item.role}</div>
               </div>
             </Reveal>
           ))}
         </div>
-        <p className="roadmap-quote">&ldquo;To make India better with healthy people.&rdquo;</p>
-      </section>
-
-      {/* CTA */}
-      <section className="cta-band">
-        <Reveal>
-          <Crest size={48} />
-          <h2 className="cta-title" style={{ marginTop: 20 }}>Ready to transform your nutrition?</h2>
-        </Reveal>
       </section>
 
       {/* CONTACT */}
       <section className="contact-band" id="contact">
         <div className="contact-grid">
           <Reveal>
-            <div className="contact-list">
-              <div className="contact-row"><span className="contact-icon">🌐</span> {CONTACT.site}</div>
-              <div className="contact-row"><span className="contact-icon">📞</span> {CONTACT.phone}</div>
-              <div className="contact-row"><span className="contact-icon">✉️</span> {CONTACT.email}</div>
-              <div className="contact-row"><span className="contact-icon">📍</span> {CONTACT.address}</div>
+            <div className="contact-card">
+              <div className="contact-card-title">Let’s build your routine</div>
+              <div className="contact-card-copy">
+                Whether you are looking for a fat-loss plan, a performance-focused meal system, or a premium nutrition service for daily delivery, AlphaEats is ready to support your goals with consistency and care.
+              </div>
+              <div className="contact-list">
+                <div className="contact-row"><span className="contact-icon">🌐</span><div>{CONTACT.site}</div></div>
+                <div className="contact-row"><span className="contact-icon">📞</span><div>{CONTACT.phone}</div></div>
+                <div className="contact-row"><span className="contact-icon">✉️</span><div>{CONTACT.email}</div></div>
+                <div className="contact-row"><span className="contact-icon">📍</span><div>{CONTACT.address}</div></div>
+              </div>
             </div>
           </Reveal>
           <Reveal delay={100}>
-            <div className="contact-photo">
-              <img src={bottomImage} alt="AlphaEats bottom showcase" className="contact-photo-image" />
-              <div className="contact-photo-quote">&ldquo;Fueling the Future of Fitness in India&rdquo;</div>
+            <div className="contact-card">
+              <div className="contact-card-title">Why reach out</div>
+              <div className="contact-meta">
+                <div className="contact-meta-item">
+                  <div className="contact-meta-label">Delivery</div>
+                  <div className="contact-meta-value">Fresh meals dispatched across Pune with flexible timings and transparent delivery support.</div>
+                </div>
+                <div className="contact-meta-item">
+                  <div className="contact-meta-label">Plans</div>
+                  <div className="contact-meta-value">Try a week, shift to monthly, or upgrade to elite and athletic nutrition whenever needed.</div>
+                </div>
+                <div className="contact-meta-item">
+                  <div className="contact-meta-label">Support</div>
+                  <div className="contact-meta-value">Quick responses for plan selection, custom preferences, and subscription updates.</div>
+                </div>
+              </div>
             </div>
           </Reveal>
         </div>
