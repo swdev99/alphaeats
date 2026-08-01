@@ -1189,19 +1189,19 @@ export default function AlphaEatsSite() {
         .stat-num { font-family: 'Playfair Display', serif; font-size: 2.6rem; font-weight: 700; }
         .stat-label { color: #5B6472; margin-top: 8px; font-size: 0.92rem; }
         .zones-title { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.4rem; color: var(--ink); margin-bottom: 20px; }
-        .zone-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
-        .zone-chip { border: 1px solid #D8D4C8; padding: 12px 8px; text-align: center; font-weight: 600; font-size: 0.88rem; color: var(--ink); background: #fff; }
+        .zone-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; grid-auto-rows: minmax(44px, auto); }
+        .zone-chip { border: 1px solid #D8D4C8; padding: 12px 10px; text-align: center; font-weight: 600; font-size: 0.88rem; color: var(--ink); background: #fff; }
 
-        @media (max-width: 920px) {
-          .zone-grid { grid-template-columns: repeat(3, 1fr); }
+        @media (max-width: 1080px) {
+          .zone-grid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
         }
 
-        @media (max-width: 660px) {
-          .zone-grid { grid-template-columns: repeat(2, 1fr); }
-          .zone-chip { padding: 12px 10px; font-size: 0.82rem; }
+        @media (max-width: 720px) {
+          .zone-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+          .zone-chip { padding: 11px 9px; font-size: 0.82rem; }
         }
 
-        @media (max-width: 460px) {
+        @media (max-width: 520px) {
           .zone-grid { grid-template-columns: 1fr; }
           .zone-chip { text-align: left; }
         }
@@ -1297,7 +1297,7 @@ export default function AlphaEatsSite() {
           .roadmap-grid { grid-template-columns: 1fr; }
           .steps-row { grid-template-columns: 1fr 1fr; }
           .contact-grid { grid-template-columns: 1fr; }
-          .nav-links { display: none; }
+          .nav-links { display: flex; flex-wrap: wrap; justify-content: center; width: 100%; gap: 18px; }
         }
 
         @media (max-width: 640px) {
@@ -1348,7 +1348,6 @@ export default function AlphaEatsSite() {
           .plan-grid-4,
           .stat-grid,
           .steps-row,
-          .zone-grid,
           .roadmap-grid {
             grid-template-columns: 1fr;
           }
