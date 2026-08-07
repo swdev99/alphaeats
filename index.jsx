@@ -1862,7 +1862,7 @@ export default function AlphaEatsSite() {
         <Reveal>
           <div className="section-head">
             <SectionLabel>Traction</SectionLabel>
-            <h2 className="section-title">Built for Pune. Ready to Scale.</h2>
+            <h2 className="section-title">Built for Pune. Designed for Your Goals.</h2>
           </div>
         </Reveal>
         <div className="stat-grid">
