@@ -462,6 +462,116 @@ function NavLogo() {
   );
 }
 
+function LegalPage({ page }) {
+  const isPrivacyPolicy = page === "privacy";
+  const title = isPrivacyPolicy ? "AlphaEats Privacy Policy" : "AlphaEats Data Deletion";
+
+  useEffect(() => {
+    document.title = title;
+    return () => {
+      document.title = "AlphaEats";
+    };
+  }, [title]);
+
+  return (
+    <div className="legal-root">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Work+Sans:wght@400;500;600&display=swap');
+        body { margin: 0; }
+        .legal-root {
+          --legal-navy: #131B27;
+          --legal-panel: #1C2635;
+          --legal-gold: #C9A24B;
+          --legal-bone: #F3F1EA;
+          --legal-slate: #B6BECA;
+          min-height: 100vh;
+          background: var(--legal-navy);
+          color: var(--legal-bone);
+          font-family: 'Work Sans', sans-serif;
+        }
+        .legal-root * { box-sizing: border-box; }
+        .legal-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+          padding: 20px max(6vw, 24px);
+          border-bottom: 1px solid rgba(201,162,75,0.2);
+          background: rgba(19,27,39,0.96);
+        }
+        .legal-brand {
+          color: var(--legal-bone);
+          font: 700 1.1rem 'Playfair Display', serif;
+          letter-spacing: 0.04em;
+          text-decoration: none;
+        }
+        .legal-home { color: var(--legal-gold); text-decoration: none; font-size: 0.9rem; }
+        .legal-home:hover, .legal-email:hover { color: #E7C97A; }
+        .legal-content { width: min(760px, calc(100% - 40px)); margin: 0 auto; padding: 76px 0 96px; }
+        .legal-eyebrow { color: var(--legal-gold); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+        .legal-content h1 { margin: 14px 0 22px; font: 700 clamp(2.2rem, 7vw, 3.5rem)/1.12 'Playfair Display', serif; }
+        .legal-content h2 { margin: 36px 0 10px; color: var(--legal-bone); font: 600 1.3rem 'Playfair Display', serif; }
+        .legal-content p, .legal-content li { color: var(--legal-slate); font-size: 1rem; line-height: 1.8; }
+        .legal-content p { margin: 0 0 18px; }
+        .legal-content ul { margin: 0 0 20px; padding-left: 22px; }
+        .legal-content li { padding: 3px 0; }
+        .legal-contact { margin-top: 28px; padding: 24px; border-left: 3px solid var(--legal-gold); background: var(--legal-panel); }
+        .legal-contact p:last-child { margin-bottom: 0; }
+        .legal-email { color: var(--legal-gold); font-weight: 600; text-underline-offset: 4px; overflow-wrap: anywhere; }
+        .legal-updated { margin-top: 42px !important; color: #8993A1 !important; font-size: 0.88rem !important; }
+        .legal-footer { padding: 22px 24px; border-top: 1px solid rgba(201,162,75,0.16); color: #8993A1; text-align: center; font-size: 0.82rem; }
+        @media (max-width: 520px) {
+          .legal-header { padding: 18px 20px; }
+          .legal-content { padding: 52px 0 68px; }
+          .legal-contact { padding: 20px; }
+        }
+      `}</style>
+      <header className="legal-header">
+        <a className="legal-brand" href="/">ALPHAEATS</a>
+        <a className="legal-home" href="/">Back to AlphaEats</a>
+      </header>
+      <main className="legal-content">
+        <div className="legal-eyebrow">AlphaEats · {isPrivacyPolicy ? "Privacy" : "Your data"}</div>
+        <h1>{title}</h1>
+        {isPrivacyPolicy ? (
+          <>
+            <p>AlphaEats respects your privacy. This Privacy Policy explains how AlphaEats collects, uses, stores, and protects information provided through our website, WhatsApp conversations, Meta services, and other services.</p>
+            <h2>Information we may collect</h2>
+            <ul>
+              <li>Name and email address</li>
+              <li>Mobile number</li>
+              <li>Address and delivery information</li>
+              <li>WhatsApp-related information you provide when communicating with AlphaEats</li>
+              <li>Information submitted through forms or advertisements</li>
+            </ul>
+            <h2>How we use information</h2>
+            <p>We use information to provide and manage AlphaEats services, communicate with customers, process and deliver orders, provide support, and improve our services.</p>
+            <h2>Data sharing</h2>
+            <p>We do not sell personal information. Information may be processed by service providers when needed to operate our services.</p>
+            <h2>Data security and retention</h2>
+            <p>We use reasonable technical and organizational measures to protect information. We retain information for as long as needed to provide our services and meet applicable legal, operational, and legitimate business requirements.</p>
+            <h2>Privacy questions</h2>
+            <p>For questions about this policy or your personal information, contact AlphaEats at <a className="legal-email" href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>.</p>
+            <p className="legal-updated">Last updated: October 3, 2026</p>
+          </>
+        ) : (
+          <>
+            <p>If you would like to request deletion of personal data associated with your AlphaEats account, email us at <a className="legal-email" href={`mailto:${CONTACT.email}?subject=AlphaEats%20data%20deletion%20request`}>{CONTACT.email}</a>.</p>
+            <div className="legal-contact">
+              <p><strong>Email:</strong> <a className="legal-email" href={`mailto:${CONTACT.email}?subject=AlphaEats%20data%20deletion%20request`}>{CONTACT.email}</a></p>
+              <p>Include your name, registered mobile number, and account email address so we can identify your account and review your request.</p>
+            </div>
+            <h2>What happens next</h2>
+            <p>The AlphaEats team will review your request and may contact you to verify your account. Eligible personal information will be deleted in accordance with applicable legal and operational requirements.</p>
+            <p>Some information may need to be retained where required by law or for legitimate business purposes.</p>
+          </>
+        )}
+      </main>
+      <footer className="legal-footer">© {new Date().getFullYear()} AlphaEats · Pune, India</footer>
+    </div>
+  );
+}
+
 export default function AlphaEatsSite() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [selectedPlan, setSelectedPlan] = useState(null);
@@ -768,6 +878,10 @@ export default function AlphaEatsSite() {
       },
     ]);
   };
+
+  const legalPath = window.location.pathname.replace(/\/+$/, "");
+  if (legalPath === "/data-deletion") return <LegalPage page="deletion" />;
+  if (legalPath === "/privacy-policy") return <LegalPage page="privacy" />;
 
   return (
     <div className="ae-root">
@@ -1279,9 +1393,12 @@ export default function AlphaEatsSite() {
         .contact-photo-quote { color: #fff; font-style: italic; text-align: center; font-family: 'Playfair Display', serif; font-size: 1.4rem; padding: 0 30px; position: relative; z-index: 2; text-shadow: 0 2px 12px rgba(0,0,0,0.45); }
         .contact-photo-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0.92; }
 
-        footer { padding: 30px 6vw; display: flex; justify-content: space-between; align-items: center;
+        footer { padding: 30px 6vw; display: flex; flex-wrap: wrap; gap: 14px 20px; justify-content: space-between; align-items: center;
           border-top: 1px solid rgba(201,162,75,0.14); color: var(--slate); font-size: 0.82rem; background: var(--navy); }
         .foot-brand { display: flex; align-items: center; gap: 10px; }
+        .foot-links { display: flex; gap: 18px; }
+        .foot-links a { color: var(--slate); text-decoration: none; }
+        .foot-links a:hover { color: var(--gold-l); }
 
         @media (max-width: 900px) {
           .hero { display: flex; }
@@ -1969,6 +2086,10 @@ export default function AlphaEatsSite() {
           <Crest size={22} />
           <span className="display" style={{ fontWeight: 700 }}>ALPHAEATS</span>
         </div>
+        <nav className="foot-links" aria-label="Legal information">
+          <a href="/privacy-policy">Privacy Policy</a>
+          <a href="/data-deletion">Data Deletion</a>
+        </nav>
         <div>© {new Date().getFullYear()} AlphaEats · Pune, India</div>
       </footer>
     </div>
